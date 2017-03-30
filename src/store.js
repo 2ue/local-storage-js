@@ -2,6 +2,10 @@
 //一些代码风格约定
 //下划线(_)开头的变量一律表示传入参数
 
+//关闭标签是是否清除localstorage
+//超出localstorage大小限制时怎么处理：新增的时候超出，改变值的时候超出
+
+
 ;
 
 var localStorage = window.localStorage;
@@ -58,9 +62,9 @@ function set(_key,_v,_t){
 //批量添加数据
 function setAll(_data,_t){
     if(!_data || !isObject(_data)) return;
-    for(let key in _data){
-        set(key,_data[key],_t);
-    };
+    // for(let key in _data){
+    //     set(key,_data[key],_t);
+    // };
 
     map(_data,function(key,val){
         set(key,val,_t);
@@ -70,9 +74,12 @@ function setAll(_data,_t){
 function coverAll(_data,_t){
     if(!_data || !isObject(_data)) return;
     localStorage.clear();
-    for(let key in _data){
+    // for(let key in _data){
+    //     set(key,_data[key],_t);
+    // };
+    map(_data,function(key){
         set(key,_data[key],_t);
-    };
+    })
 };
 //get相关
 //获取数据
@@ -98,9 +105,12 @@ function get(_key,_type){
 
     function getList(_arr){
         let tmpRes = {};
-        for(let i = 0; i < _arr.length; i++){
-            tmpRes[_arr[i]] = localStorage.getItem(_arr[i]);
-        };
+        // for(let i = 0; i < _arr.length; i++){
+        //     tmpRes[_arr[i]] = localStorage.getItem(_arr[i]);
+        // };
+        map(_arr,function(index,val){
+            tmpRes[val] = localStorage.getItem(val);
+        })
         return tmpRes;
     }
 
@@ -109,21 +119,26 @@ function get(_key,_type){
 //获取所有数据
 function getAll(){
     var res = {};
-    for(let key in localStorage){
+    map(localStorage,function(key,val){
         res[key] = localStorage.getItem(key);
-    };
+    })
     return res;
 };
 
 //判断是否包含key
 function has(_key){
     var res = false;
-    for(let key in localStorage){
-        if(key == _key){
-            res = true;
-            break;
-        };
-    };
+    // for(let key in localStorage){
+    //     if(key == _key){
+    //         res = true;
+    //         break;
+    //     };
+    // };
+    map(localStorage,function(key){
+        if(key != _key) return;
+        res = true;
+        break;
+    })
     return res;
 };
 
@@ -131,21 +146,25 @@ function has(_key){
 function remove(_key){
     if(!_key || isString(_key) || isArray(_key)) return;
     _key = isArray(_key) ? _key : [_key];
-    for(let i = 0; i < _key.length; i++){
-        localStorage.removeItem(_key);
-    };
+    map(_key,function(index,val){
+        localStorage.removeItem(val);
+    });
 };
-function clear(){
-    for(let key in localStorage){
-        localStorage.removeItem(key);
+function clear(_t){
+    if(!!t && typeof _t === 'number' && _t > 0){
+        setTimeout(function() {
+            localStorage.clear();
+        }, _t);
+    }else{
+        localStorage.clear();
     };
 };
 
 function keys(){
     var res = [];
-    for(let key in localStorage){
+    map(localStorage,function(key,item){
         res.push(key);
-    };
+    });
     return res;
 }
 
@@ -160,9 +179,7 @@ setAll({'["nannn",999]':[888],'nicName4':{test:'uuuu',uuu:8777}},10)
 // coverAll({hhhh:9999})
 console.log(localStorage);
 
-
 //API END
-
 
 //判断类型
 function isNumber(_v){
@@ -216,11 +233,11 @@ function map(_v,fn){
     if(!_v || (!isArr && !isobj)) return;
     if(isArr){
         for(let i = 0; i < _v.length; i++){
-            fn(i, _v[i], _v);
+            if(!!fn && (typeof fn === 'function')) fn(i, _v[i], _v);
         };
     }else{
         for(let key in _v){
-            fn(key, _v[key], _v)
+            if(!!fn && (typeof fn === 'function')) fn(key, _v[key], _v);
         }
     }
 };

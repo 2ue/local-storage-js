@@ -10,10 +10,14 @@ module.exports = {
     //
     toStr: toString,
     toArr: toArray,
-    toObj: toObject
+    toObj: toObject,
+    //methods
+    map: map
+
 
 };
 
+//判断类型
 //判断类型
 function isNumber(_v){
     return !!_v && (typeof _v === 'number');
@@ -43,8 +47,8 @@ function toString(_v, _symbol){
 
     if(!_v || isFunction(_v)　|| isStorage(_v)) return null;
     _symbol = !_symbol ? '&' : _symbol;
-    console.log(isArry(_v))
-    if(isArry(_v)) return _v.join(_symbol);
+    // console.log(isArray(_v))
+    if(toArray(_v)) return _v.join(_symbol);
     if(isObject(_v)) return JSON.stringify(_v);
     return _v;
 
@@ -54,6 +58,23 @@ function toArray(_v, _symbol){
     return undefined;
 };
 function toObject(_v, _symbol){
-    if(isString(_v)) return JSON.parse(_v)
+    if(isString(_v)) return JSON.parse(_v);
     return undefined;
-}
+};
+
+//一些数据处理方法
+
+function map(_v,fn){
+    const isArr = isArray(_v);
+    const isobj = isObject(_v);
+    if(!_v || (!isArr && !isobj)) return;
+    if(isArr){
+        for(let i = 0; i < _v.length; i++){
+            if(!!fn && (typeof fn === 'function')) fn(i, _v[i], _v);
+        };
+    }else{
+        for(let key in _v){
+            if(!!fn && (typeof fn === 'function')) fn(key, _v[key], _v);
+        }
+    }
+};
