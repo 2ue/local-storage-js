@@ -149,16 +149,16 @@ function keys(){
     return res;
 }
 
-set([3123,66555],[900980,7878786668])
-set('nicName3',{vsxcv:'u42342uuu',dasda:23441312})
-setAll({'["nannn",999]':[888],'nicName4':{test:'uuuu',uuu:8777}},10)
+// set([3123,66555],[900980,7878786668])
+// set('nicName3',{vsxcv:'u42342uuu',dasda:23441312})
+// setAll({'["nannn",999]':[888],'nicName4':{test:'uuuu',uuu:8777}},10)
 
 // console.log(get({name:['name','nicName4','nicName3'],other:[66555,'test','nannn']}));
 // console.log(getAll())
 // console.log(has(9991))
 // console.log(get('nannn'))
 // coverAll({hhhh:9999})
-console.log(localStorage);
+// console.log(localStorage);
 
 //API END
 
