@@ -11,26 +11,6 @@
 var localStorage = window.localStorage;
 localStorage.clear()
 localStorage.setItem('name','test')
-// console.log(localStorage)
-// function store (){
-//     return localStorage
-// }
-// console.log(store ())
-
-// for(let key in localStorage){
-//     console.log(key +': ' + localStorage[key])
-// }
-// console.log(JSON.stringify(['aa',9999]))
-
-// var hh = document.getElementById('userName');
-// hh.value = localStorage.getItem('name');
-// ;
-// module.exports = {
-// 	isStr: isStr,
-//     isArry: isArry,
-//     isFun: isFunction,
-//     isObj: isObject
-// };
 
 //API START
 //添加数据
@@ -73,6 +53,7 @@ function setAll(_data,_t){
 //覆盖批量添加数据
 function coverAll(_data,_t){
     if(!_data || !isObject(_data)) return;
+    //又BUG，思考应该再判断数据类型正确之后才清空
     localStorage.clear();
     // for(let key in _data){
     //     set(key,_data[key],_t);
