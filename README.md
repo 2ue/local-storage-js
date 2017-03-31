@@ -30,8 +30,7 @@ set(['name','nicName'],'2ue')//name:'2ue',nicName:'2ue'
 set(['name','nicName'],['2ue'])//name:'2ue',nicName:''
 set(['name','nicName'],['2ue','monork'])//name:'2ue',nicName:'monork'
 set(['name','nicName'],['2ue','monork','duoyude'])//name:'2ue',nicName:'monork'
-set(['name','nicName'],{name:'2ue',nicName:'monork'})//对{name:2ue,nicName:'monork'}调用JSON.stringify()方法
-```
+set(['name','nicName'],{name:'2ue',nicName:'monork'})//自动根据前面拆分的key匹配{name:'2ue',nicName:'monork'}中相同的key值
 
 `setAll(obj)`  
 

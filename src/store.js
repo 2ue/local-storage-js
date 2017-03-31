@@ -25,6 +25,8 @@ function set(_key,_v,_t){
         if(isArray(_v)){
             _v.length = keys.length;
             tempV = typeof _v[i] === 'undefined' ? '' : _v[i];
+        }else if(isObject(_v)){
+            tempV = typeof _v[keys[i]] === 'undefined' ? '' : _v[keys[i]];
         }else{
             tempV = !_v ? null : toString(_v);
         };
