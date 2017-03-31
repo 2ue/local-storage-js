@@ -10,7 +10,45 @@
 
 var localStorage = window.localStorage;
 localStorage.clear()
-localStorage.setItem('name','test')
+
+function store (obj){
+    this._init(obj);
+};
+
+store.prototype = {
+
+    _init: function(obj){
+        const DEFAULT_OPTIONS = {
+            isClear: false,//是否先清除localstorage
+            clearAllTime: 5,//是否定时清除所有数据，不设置表示不清除，并设置时间，单位m
+            clearSingleTime:5,//设置默认单个清除时间，不设置表示不清除，并设置时间，单位m
+            limitSize:5//大小限制，单位MB
+        };
+
+        if(!obj || _isObject(obj)){
+            obj = DEFAULT_OPTIONS;
+        }else{
+            map(DEFAULT_OPTIONS,function(key,val){
+                if(typeof obj[key] === 'undefined' || obj[key] == null) obj[key] = val;
+            });
+        };
+        this.options = obj;
+        this._methods();
+    },
+    _methods: function(){
+        var _self = this;
+        _self.get = function(_key,_v,_t){
+
+        }
+    }
+
+}
+
+//抽象方法
+// function getItem(_key,_v,_v){
+//     if()
+// }
+
 
 //API START
 //添加数据
@@ -44,10 +82,6 @@ function set(_key,_v,_t){
 //批量添加数据
 function setAll(_data,_t){
     if(!_data || !isObject(_data)) return;
-    // for(let key in _data){
-    //     set(key,_data[key],_t);
-    // };
-
     map(_data,function(key,val){
         set(key,val,_t);
     });
@@ -111,12 +145,6 @@ function getAll(){
 //判断是否包含key
 function has(_key){
     var res = false;
-    // for(let key in localStorage){
-    //     if(key == _key){
-    //         res = true;
-    //         break;
-    //     };
-    // };
     map(localStorage,function(key){
         if(key != _key) return;
         res = true;
@@ -164,31 +192,92 @@ function keys(){
 
 //API END
 
+
+
 //判断类型
+
+/*
+* isNaN(para) --> ?
+
+-1,0,1 --> false
+'',' ',null,undefined,NaN,a,true,{},[],function(){}, --> false
+
+###注意对字普通类型进行布尔转换时，空格也会被转化成true
+*
+*/
+
+/*
+* typeof para --> ?
+
+-1,0,1,NaN --> number
+'1',a,'',' ' --> string
+undefined --> undefined
+true --> boolean
+null,{},[],function(){} --> object
+function(){} --> function
+
+*
+*/
+
+/*
+* !para --> ?
+
+0,'',flase,undefined,NaN --> true
+-1,1,' ',a,null,true,{},[],function(){}, --> false
+
+*
+*/
+
+/*
+* Object.prototype.toString.call(para)
+{} --> [object Object]
+[] --> [object Array]
+function(){} --> [object Function]
+null --> [object Null]
+undefined --> [object Undefined]
+true --> [object Boolean]
+-1,0,1,NaN --> [object Number]
+'',' ','1',a, --> [object String]
+
+###注意对字普通类型进行布尔转换时，空格也会被转化成true
+*
+*/
+
+//判断是否定义，参数是否存在: typeof para === 'undefined'
+//判断number（可以运算的）： !isNaN(para)
+//判断string: 
+    //1.空格也会被识别为string，判断之前应该先确定是否需要空格参与判断
+    //2.'1'也会被识别成string，判断之前应该先确定是否需要格式化number
+    // typeof para !== 'undefined' && typeof para === 'string' 
+    //或者
+    //!!para && && typeof para === 'string' 
+//判断数组、对象，必须使用Object.prototype.toString.call(para)
+
 function isNumber(_v){
-    return !!_v && (typeof _v === 'number');
+    return !isNaN(_v);
 };
 function isString(_v){
-    return !!_v && (typeof _v === 'string' || typeof _v === 'number');
+    return typeof _v === 'string' || typeof _v === 'number';
 };
 function isArray(_v){
-    if(typeof _v !== 'object') return false;
-    return !!_v && Object.prototype.toString.call(_v) === '[object Array]';
+    return Object.prototype.toString.call(_v) === '[object Array]';
 };
 function isFunction(_v){
-    if(typeof _v !==  'object') return false;
-    return !!_v && Object.prototype.toString.call(_v) === '[object Function]';
+    return typeof _v === 'function';
 };
 function isObject(_v){
-    if(typeof _v !==  'object') return false;
-    return !!_v && Object.prototype.toString.call(_v) === '[object Object]';
+    return Object.prototype.toString.call(_v) === '[object Object]';
 };
 function isStorage(_v){
-    if(typeof _v !==  'object') return false;
-    return !!_v && Object.prototype.toString.call(_v) === '[object Storage]';
+    return Object.prototype.toString.call(_v) === '[object Storage]';
 };
 
-//转换类型
+//判断是否自身属性
+function isOwnPro(obj,key){
+    return isObject(_v) && isString(_v) && obj.hasOwnProperty(key);
+};
+
+//数据类型互转的方法
 function toString(_v, _symbol){
 
     if(!_v || isFunction(_v)　|| isStorage(_v)) return null;
@@ -203,24 +292,26 @@ function toArray(_v, _symbol){
     if(isString(_v)) return _v.split(!_symbol ? '&' : _symbol);
     return undefined;
 };
-function toObject(_v, _symbol){
+function toJSON(_v, _symbol){
     if(isString(_v)) return JSON.parse(_v);
     return undefined;
 };
 
-//一些数据处理方法
-
+//数据处理方法
 function map(_v,fn){
+
     const isArr = isArray(_v);
     const isobj = isObject(_v);
-    if(!_v || (!isArr && !isobj)) return;
+    const isFun = isFunction(fn);
+    if(!isArr && !isobj) return;
     if(isArr){
         for(let i = 0; i < _v.length; i++){
-            if(!!fn && (typeof fn === 'function')) fn(i, _v[i], _v);
+            if(isFun) fn(i, _v[i], _v);
         };
     }else{
         for(let key in _v){
-            if(!!fn && (typeof fn === 'function')) fn(key, _v[key], _v);
+            if(isFun) fn(key, _v[key], _v);
         }
     }
+
 };
