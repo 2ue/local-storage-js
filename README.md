@@ -37,7 +37,6 @@ set(['name','nicName'],{name:'2ue',nicName:'monork'})//对{name:2ue,nicName:'mon
 
 - 作用：批量写入，不会覆盖清除以前数据
 
-
 - obj类型为object，表示需要写入的数据。必须参数。
 - 此方法会对对obj循环，然后每次都会调用set(key,obj[key]);
 
@@ -83,4 +82,4 @@ get({names:['name','nicName3','nicName4'],others:[66555,'test','nannn']})//{name
 
 `keys()`
 
-- 作用：返回localstorage中所有的key
+- 作用：返回localstorage中所有的key的数组
