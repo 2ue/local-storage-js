@@ -149,6 +149,7 @@ function getAll(){
 //判断是否包含key
 function has(_key){
     var res = false;
+    //用hasOwnProperty？
     map(localStorage,function(key){
         if(key != _key) return;
         res = true;
