@@ -5,9 +5,7 @@
 //关闭标签是是否清除localstorage
 //超出localstorage大小限制时怎么处理：新增的时候超出，改变值的时候超出
 
-
 ;
-
 var localStorage = window.localStorage;
 localStorage.clear()
 
@@ -56,14 +54,20 @@ function set(_key,_v,_t){
     //_key支持string，array
     //_t为定时清除localstorage，类型为number，单位为ms
     //验证_key是否为空，string，arry
-    if(!_key && (!isString(_key) || !isArray(_key))) return;
-    var keys = isArray(_key)  ? _key : (isString(_key) && _key.indexOf('[') === 0) ? JSON.parse(_key) : [_key];
+
+    const isStr = isString(_key);
+    const isArr = isArray(_key);
+    const isArrV = isArray(_v);
+    const isObjV = isObject(_v);
+
+    if(!isStr || !isArr) return;
+    var keys = isArr  ? _key : (isStr && _key.indexOf('[') === 0) ? JSON.parse(_key) : [_key];
     for(let i = 0; i < keys.length; i++){
         var tempV = '';
-        if(isArray(_v)){
+        if(isArrV){
             _v.length = keys.length;
             tempV = typeof _v[i] === 'undefined' ? '' : _v[i];
-        }else if(isObject(_v)){
+        }else if(isObjV){
             tempV = typeof _v[keys[i]] === 'undefined' ? '' : _v[keys[i]];
         }else{
             tempV = !_v ? null : toString(_v);
@@ -71,7 +75,7 @@ function set(_key,_v,_t){
         
         localStorage.setItem(keys[i],tempV);
         //定时清除
-        if(!!_t && isNumber(_t) && _t >= 0){
+        if(isNumber(_t) && _t > 0){
             setTimeout(function() {
                 localStorage.removeItem(keys[i]);
             }, _t);
@@ -105,7 +109,7 @@ function get(_key,_type){
     const isArr = isString(_key);
     const isObj = isObject(_key);
 
-    if(!_key || (!isStr && !isArr && !isObj)) return;
+    if(!isStr && !isArr && !isObj) return;
     _type = isStr ? 'string' : 'object';
     var res = {};
     if(isObj){
@@ -155,14 +159,14 @@ function has(_key){
 
 //移除key
 function remove(_key){
-    if(!_key || isString(_key) || isArray(_key)) return;
+    if(!isString(_key) || !isArray(_key)) return;
     _key = isArray(_key) ? _key : [_key];
     map(_key,function(index,val){
         localStorage.removeItem(val);
     });
 };
 function clear(_t){
-    if(!!t && typeof _t === 'number' && _t > 0){
+    if(isNumber(_t) && _t > 0){
         setTimeout(function() {
             localStorage.clear();
         }, _t);
@@ -283,7 +287,7 @@ function toString(_v, _symbol){
     if(!_v || isFunction(_v)　|| isStorage(_v)) return null;
     _symbol = !_symbol ? '&' : _symbol;
     // console.log(isArray(_v))
-    if(toArray(_v)) return _v.join(_symbol);
+    if(isArray(_v)) return _v.join(_symbol);
     if(isObject(_v)) return JSON.stringify(_v);
     return _v;
 
