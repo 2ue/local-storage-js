@@ -258,11 +258,31 @@ true --> [object Boolean]
     //!!para && && typeof para === 'string' 
 //判断数组、对象，必须使用Object.prototype.toString.call(para)
 
+//判断数字(非严格)
 function isNumber(_v){
     return !isNaN(_v);
 };
+//判断数字(严格)
+//在必要的情况下使用，因为此种方法会把'1'识别成`string`类型
+function isStrictNumber(_v){
+    return !isNaN(_v) && typeof _v === 'number';
+};
+//判断字符串（非严格）
 function isString(_v){
-    return typeof _v === 'string' || typeof _v === 'number';
+    return typeof _v === 'string';
+};
+//判断字符串（严格）
+//在必要的情况下使用，因为此种方法会把'1'识别成`number`类型
+function isStrictString(_v){
+    return isNaN(_v) && typeof _v === 'string';
+};
+//判断是否为Null(不能识别'')
+function isNull(_v){
+    return !_v && typeof _v === 'object';
+};
+//判断是否为''(不能识别null)
+function isStringNull(_v){
+    return !_v && typeof _v === 'string' && isNaN(_v);
 };
 function isArray(_v){
     return Object.prototype.toString.call(_v) === '[object Array]';
@@ -276,10 +296,14 @@ function isObject(_v){
 function isStorage(_v){
     return Object.prototype.toString.call(_v) === '[object Storage]';
 };
+function isBasicType(_v){
+    const _type = typeof _v;
+    return _type === 'undefined' || _type === 'number' || _type === 'string' || type === 'boolean';
+};
 
 //判断是否自身属性
 function isOwnPro(obj,key){
-    return isObject(_v) && isString(_v) && obj.hasOwnProperty(key);
+    return isObject(obj) && isString(key) && obj.hasOwnProperty(key);
 };
 
 //数据类型互转的方法
