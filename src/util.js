@@ -68,7 +68,8 @@ function isOwnPro(obj,key){
 
 //数据类型互转的方法
 function toString(_v, _symbol){
-    if(!_v && typeof _v === 'object') return null;
+    // if(isNull(_v) || isStringNull(_v)) return null;
+    if(!_v) return null;
     if(isBasicType(_v)) return _v;
     // if(isFunction(_v)　|| isStorage(_v)) return null;
     _symbol = !_symbol ? '&' : _symbol;
