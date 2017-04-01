@@ -23,7 +23,7 @@ store.prototype = {
             limitSize:5//大小限制，单位MB
         };
 
-        if(!obj || _isObject(obj)){
+        if(!obj || _isStrictObject(obj)){
             obj = DEFAULT_OPTIONS;
         }else{
             map(DEFAULT_OPTIONS,function(key,val){
@@ -58,7 +58,7 @@ function set(_key,_v,_t){
     const isStr = isString(_key);
     const isArr = isArray(_key);
     const isArrV = isArray(_v);
-    const isObjV = isObject(_v);
+    const isObjV = isStrictObject(_v);
 
     if(!isStr || !isArr) return;
     var keys = isArr  ? _key : (isStr && _key.indexOf('[') === 0) ? JSON.parse(_key) : [_key];
@@ -85,14 +85,14 @@ function set(_key,_v,_t){
 };
 //批量添加数据
 function setAll(_data,_t){
-    if(!_data || !isObject(_data)) return;
+    if(!_data || !isStrictObject(_data)) return;
     map(_data,function(key,val){
         set(key,val,_t);
     });
 };
 //覆盖批量添加数据
 function coverAll(_data,_t){
-    if(!_data || !isObject(_data)) return;
+    if(!_data || !isStrictObject(_data)) return;
     //又BUG，思考应该再判断数据类型正确之后才清空
     localStorage.clear();
     // for(let key in _data){
@@ -107,7 +107,7 @@ function coverAll(_data,_t){
 function get(_key,_type){
     const isStr = isString(_key);
     const isArr = isString(_key);
-    const isObj = isObject(_key);
+    const isObj = isStrictObject(_key);
 
     if(!isStr && !isArr && !isObj) return;
     _type = isStr ? 'string' : 'object';
@@ -287,11 +287,20 @@ function isStringNull(_v){
 function isArray(_v){
     return Object.prototype.toString.call(_v) === '[object Array]';
 };
+//判断字符串（非严格1--所有的obejct对象）
+function isAllObject(_v){
+    return typeof _v === 'obejct';
+};
+//判断字符串（非严格2--除去null的所有object对象）
+function isObject(_v){
+    return !!v && typeof _v === 'obejct';
+};
+//判断字符串（严格--只识别{}JSON对象）
+function isStrictObject(_v){
+    return Object.prototype.toString.call(_v) === '[object Object]';
+};
 function isFunction(_v){
     return typeof _v === 'function';
-};
-function isObject(_v){
-    return Object.prototype.toString.call(_v) === '[object Object]';
 };
 function isStorage(_v){
     return Object.prototype.toString.call(_v) === '[object Storage]';
@@ -303,7 +312,7 @@ function isBasicType(_v){
 
 //判断是否自身属性
 function isOwnPro(obj,key){
-    return isObject(obj) && isString(key) && obj.hasOwnProperty(key);
+    return isStrictObject(obj) && isString(key) && obj.hasOwnProperty(key);
 };
 
 //数据类型互转的方法
@@ -315,7 +324,7 @@ function toString(_v, _symbol){
     _symbol = !_symbol ? '&' : _symbol;
     // console.log(isArray(_v))
     if(isArray(_v)) return _v.join(_symbol);
-    if(isObject(_v) || isFunction(_v)　|| isStorage(_v)) return JSON.stringify(_v);
+    if(isStrictObject(_v) || isFunction(_v)　|| isStorage(_v)) return JSON.stringify(_v);
     return _v;
 
 };
@@ -332,7 +341,7 @@ function toJSON(_v, _symbol){
 function map(_v,fn){
 
     const isArr = isArray(_v);
-    const isobj = isObject(_v);
+    const isobj = isStrictObject(_v);
     const isFun = isFunction(fn);
     if(!isArr && !isobj) return;
     if(isArr){
