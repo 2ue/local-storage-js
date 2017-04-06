@@ -26,7 +26,7 @@ store.prototype = {
         if(!obj || _isStrictObject(obj)){
             obj = DEFAULT_OPTIONS;
         }else{
-            map(DEFAULT_OPTIONS,function(key,val){
+            myMap(DEFAULT_OPTIONS,function(key,val){
                 if(typeof obj[key] === 'undefined' || obj[key] == null) obj[key] = val;
             });
         };
@@ -70,7 +70,7 @@ function set(_key,_v,_t){
         }else if(isObjV){
             tempV = typeof _v[keys[i]] === 'undefined' ? '' : _v[keys[i]];
         }else{
-            tempV = !_v ? null : toString(_v);
+            tempV = !_v ? '' : toString(_v);
         };
         
         localStorage.setItem(keys[i],tempV);
@@ -86,7 +86,7 @@ function set(_key,_v,_t){
 //批量添加数据
 function setAll(_data,_t){
     if(!_data || !isStrictObject(_data)) return;
-    map(_data,function(key,val){
+    myMap(_data,function(key,val){
         set(key,val,_t);
     });
 };
@@ -98,7 +98,7 @@ function coverAll(_data,_t){
     // for(let key in _data){
     //     set(key,_data[key],_t);
     // };
-    map(_data,function(key){
+    myMap(_data,function(key){
         set(key,_data[key],_t);
     })
 };
@@ -129,7 +129,7 @@ function get(_key,_type){
         // for(let i = 0; i < _arr.length; i++){
         //     tmpRes[_arr[i]] = localStorage.getItem(_arr[i]);
         // };
-        map(_arr,function(index,val){
+        myMap(_arr,function(index,val){
             tmpRes[val] = localStorage.getItem(val);
         })
         return tmpRes;
@@ -140,7 +140,7 @@ function get(_key,_type){
 //获取所有数据
 function getAll(){
     var res = {};
-    map(localStorage,function(key,val){
+    myMap(localStorage,function(key,val){
         res[key] = localStorage.getItem(key);
     })
     return res;
@@ -150,7 +150,7 @@ function getAll(){
 function has(_key){
     var res = false;
     //用hasOwnProperty？
-    map(localStorage,function(key){
+    myMap(localStorage,function(key){
         if(key != _key) return;
         res = true;
         break;
@@ -160,10 +160,13 @@ function has(_key){
 
 //移除key
 function remove(_key){
-    if(!isString(_key) || !isArray(_key)) return;
-    _key = isArray(_key) ? _key : [_key];
-    map(_key,function(index,val){
-        localStorage.removeItem(val);
+    var isStr = isString(_key);
+    var isArr = isArray(_key);
+    var isStrictObj = isStrictObject(_key);
+    if(!isStr || !isArr || !isStrictObj) return;
+    _key = isArr ? _key : isStrictObj ? key : [_key];
+    myMap(_key,function(i,val){
+        localStorage.removeItem(isStrictObj ? i : val);
     });
 };
 function clear(_t){
@@ -178,7 +181,7 @@ function clear(_t){
 
 function keys(){
     var res = [];
-    map(localStorage,function(key,item){
+    myMap(localStorage,function(key,item){
         res.push(key);
     });
     return res;
@@ -338,20 +341,62 @@ function toJSON(_v, _symbol){
 };
 
 //数据处理方法
-function map(_v,fn){
-
+window.myMap = function(_v,fn){
     const isArr = isArray(_v);
     const isobj = isStrictObject(_v);
     const isFun = isFunction(fn);
     if(!isArr && !isobj) return;
-    if(isArr){
-        for(let i = 0; i < _v.length; i++){
-            if(isFun) fn(i, _v[i], _v);
-        };
-    }else{
-        for(let key in _v){
-            if(isFun) fn(key, _v[key], _v);
+    // if(!window.Map){
+        if(isArr){
+            for(let i = 0; i < _v.length; i++){
+                if(isFun) fn(i, _v[i], _v);
+            };
+        }else{
+            for(let key in _v){
+                if(isFun) fn(key, _v[key], _v);
+            };
         }
-    }
+    // }else{
+    //      _v.map(function(v,i,quote){
+    //         if(isFun) fn(i, v, quote);
+    //     })
+    // }
+ }
 
-};
+//深度遍历一个对象
+//判断数据类型，判断私有属性
+//遍历方法
+
+var data = {
+    name:['2ue','monork',333,'test'],
+    getMethods:{
+        getDefualtName: 'aaa',
+        setDefualtName: 'nicName',
+        getName: function(i){
+            console.log(this.name[i])
+        },
+        setName: function(val){
+            return val;
+        }
+    },
+    quoteName: 'list',
+    date: '2017-4-5 10:39:42',
+    ages: '27'
+}
+
+var test = eachTo(data);
+console.log(test);
+
+function eachTo (_data, res){
+    const isStrictObj = isStrictObject(_data);
+    var res = !res ? {} : res;
+    if(!isStrictObj) return _data;
+    myMap(_data, function(i,v){
+        console.log(i + ': ' + !isStrictObject(v));
+        if(!isStrictObject(v)) {
+            res[i] = v;
+        };
+        eachTo (v);
+    },true);
+    return res;
+}
