@@ -1,12 +1,11 @@
 #一个简单的localstorage封装
 
-> 目前只是做一个很简单的封装，还未做兼容检测等
+> 对localStore的一个封装，方便项目中更简洁的实现持久化
 
 ## API
-`set(_key,_val)` 
+`set(_key,_val)`
 
 - 作用：写入数据
-
 
 - _key类型为string、number、array，且不能为空
     - string、number作为键值对直接储存
@@ -32,28 +31,28 @@ set(['name','nicName'],['2ue','monork'])//name:'2ue',nicName:'monork'
 set(['name','nicName'],['2ue','monork','duoyude'])//name:'2ue',nicName:'monork'
 set(['name','nicName'],{name:'2ue',nicName:'monork'})//自动根据前面拆分的key匹配{name:'2ue',nicName:'monork'}中相同的key值
 
-`setAll(obj)`  
+`setAll(_obj)`  
 
 - 作用：批量写入，不会覆盖清除以前数据
 
-- obj类型为object，表示需要写入的数据。必须参数。
-- 此方法会对对obj循环，然后每次都会调用set(key,obj[key]);
+- _obj类型为object，表示需要写入的数据。必须参数。
+- 此方法会对对_obj循环，然后每次都会调用set(_key,_obj[_key]);
 
 ``` javascript
 setAll({'["nannn",999]':[888],'nicName4':{test:'uuuu',uuu:8777}})
 ```
 
-`coverAll(obj)` 
+`coverAll(_obj)` 
 
 - 作用：批量覆盖写入，设置之前会清空localstorage，不依赖于setAll()方法
-- obj同setAll()
+- _obj同setAll()
 
-`get(key,type)`  
+`get(_key,_type)`  
 
 - 作用：获取数据
-- key类型为string，number，array，object，必须
-- 默认key为string，number时，返回string，为array和object时返回json
-- type类型为字符串，非必须，表示最终返回结果的格式。json表示返回json格式数据，为空或者string表示返回一般字符串类型数据
+- _key类型为string，number，array，object，必须
+- 默认_key为string，number时，返回string，为array和object时返回json
+- _type类型为字符串，非必须，表示最终返回结果的格式。json表示返回json格式数据，为空或者string表示返回一般字符串类型数据
 
 ``` javascript
 get(['name','nicName3','nicName4'])//{name:'2ue',nicName3:'2ue3',nicName4:'2UE4'}
@@ -64,14 +63,14 @@ get({names:['name','nicName3','nicName4'],others:[66555,'test','nannn']})//{name
 
 - 作用：返回所有的localstorage数据，返回一个新副本，和localstorage无关联
 
-`has(key)`
+`has(_key)`
 
-- 作用：判断是否包含又当前key，返回布尔值
-- key目前只支持string类型，后期考虑添加array类型
+- 作用：判断是否包含又当前_key，返回布尔值
+- _key目前只支持string类型，后期考虑添加array类型
 
-`remove(key)`
+`remove(_key)`
 
-- 作用：移除当前key，
+- 作用：移除当前_key，
 - 支持string和array
 
 `clear(_t)`
@@ -81,4 +80,4 @@ get({names:['name','nicName3','nicName4'],others:[66555,'test','nannn']})//{name
 
 `keys()`
 
-- 作用：返回localstorage中所有的key的数组
+- 作用：返回localstorage中所有的_key的数组

@@ -115,3 +115,20 @@ function map(_v,fn){
     }
 
 };
+
+
+// number 处理
+//千分位，多分位
+function splitNum(num,_len,_type){
+
+    if(!num) return 0;
+    num = toString(num.replace(/\,/g,''));
+    _len = isStrictNumber(_len) ? _len : '3';
+    _type = isStrictString(_type) && _type !== 'a' ? 's' : 'a';
+
+    const res = 0;
+    res = num.split('').reverse().join('').replace(/(\d{_len}(?=\d)(?!\d+\.|$))/g, '$1,').split('').reverse().join('');
+    if(_type === 'a') res = res.split(',');
+    return res;
+
+}

@@ -1,6 +1,4 @@
 //封装一些简单的localstorage API
-//一些代码风格约定
-//下划线(_)开头的变量一律表示传入参数
 
 //关闭标签是是否清除localstorage
 //超出localstorage大小限制时怎么处理：新增的时候超出，改变值的时候超出
@@ -18,8 +16,8 @@ store.prototype = {
     _init: function(obj){
         const DEFAULT_OPTIONS = {
             isClear: false,//是否先清除localstorage
-            clearAllTime: 5,//是否定时清除所有数据，不设置表示不清除，并设置时间，单位m
-            clearSingleTime:5,//设置默认单个清除时间，不设置表示不清除，并设置时间，单位m
+            clearAllTime: 5000,//是否定时清除所有数据，不设置表示不清除，并设置时间，单位ms
+            clearSingleTime:5000,//设置默认单个清除时间，不设置表示不清除，并设置时间，单位ms
             limitSize:5//大小限制，单位MB
         };
 
