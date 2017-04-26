@@ -264,7 +264,7 @@ function isNumber(_v){
     return !isNaN(_v);
 };
 //判断数字(严格)
-//在必要的情况下使用，因为此种方法会把'1'识别成`string`类型
+//在必要的情况下使用，因为此种方法会把''1''识别成`string`类型
 function isStrictNumber(_v){
     return !isNaN(_v) && typeof _v === 'number';
 };
