@@ -1,3 +1,5 @@
+//阿拉伯数字转换为中文
+;
 //默认配置
 var UNIT_ARRAY = ['千','百','十'];
 var NUM_ARRAY = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
@@ -37,24 +39,6 @@ function switchNum(num,_index){
         }
         
     });
-    // for(let i = 0; i < num.length; i++){
-    
-    //     if(!num[i] || num[i] == 0) {
-    //         // （i < num.length - 1 && (!num[i+1] || num[i+1] == 0) 在0-length-1（不包含边界）这个范围内，下一个为零，则当前不补位
-    //         // i == num.length - 1如果最后一位为0，则不补位
-    //         if(i < num.length - 1 && (!num[i+1] || num[i+1] == 0) || i == num.length - 1) {
-    //             res.push('');
-    //         }else{
-    //             res.push(NUM_ARRAY[0]);
-    //         }
-            
-
-    //     }else if(i != num.length - 1){
-    //         res.push(NUM_ARRAY[num[i]] + UNIT_ARRAY[i])
-    //     }else{
-    //         res.push(NUM_ARRAY[num[i]])
-    //     }
-    // };
     return res.join('').replace(REG_DEL_REPEAT,'$1');
 
 }
@@ -62,12 +46,10 @@ function switchNum(num,_index){
 //拼接
 function jionNum (num) {
     num = splitNum(num);
-    console.log(num)
     var len = num.length;
     var reslt = '';
     for(let i = 0; i < len; i++){
         var temp = switchNum(num[i],i == 0);
-        console.log(temp)
         if(!temp) temp = NUM_ARRAY[0];
         if(len - 1 == i || temp == NUM_ARRAY[0]){
             reslt += temp;
@@ -81,3 +63,8 @@ function jionNum (num) {
 };
 
 console.log(jionNum('300000000056747740230023050789'));
+
+//向外提供接口
+module.exports = {
+    tsNum: jionNum
+};

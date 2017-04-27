@@ -1,29 +1,14 @@
-// 提供一些公用的检测方法
+// 提供一些公用方法
 ;
-module.exports = {
-    isNum: isNumber,
-	isStr: isString,
-    isArr: isArray,
-    isFun: isFunction,
-    isObj: isStrictObject,
-    isSto: isStorage,
-    //
-    toStr: toString,
-    toArr: toArray,
-    toObj: toObject,
-    //methods
-    map: map
 
+//类型检测 --- START
 
-};
-
-//判断类型
 //判断数字(非严格)
 function isNumber(_v){
     return !isNaN(_v);
 };
 //判断数字(严格)
-//在必要的情况下使用，因为此种方法会把'1'识别成`string`类型
+//在必要的情况下使用，因为此种方法会把''1''识别成`string`类型
 function isStrictNumber(_v){
     return !isNaN(_v) && typeof _v === 'number';
 };
@@ -44,7 +29,10 @@ function isNull(_v){
 function isStringNull(_v){
     return !_v && typeof _v === 'string' && isNaN(_v);
 };
-//判断字符串（非严格1--所有的obejct对象）
+function isArray(_v){
+    return Object.prototype.toString.call(_v) === '[object Array]';
+};
+//判断字符串（非严格1--所有的obejct对象,包括null）
 function isAllObject(_v){
     return typeof _v === 'obejct';
 };
@@ -55,9 +43,6 @@ function isObject(_v){
 //判断字符串（严格--只识别{}JSON对象）
 function isStrictObject(_v){
     return Object.prototype.toString.call(_v) === '[object Object]';
-};
-function isArray(_v){
-    return Object.prototype.toString.call(_v) === '[object Array]';
 };
 function isFunction(_v){
     return typeof _v === 'function';
@@ -75,6 +60,9 @@ function isOwnPro(obj,key){
     return isStrictObject(obj) && isString(key) && obj.hasOwnProperty(key);
 };
 
+//类型检测 --- END
+
+//数据转换 --- START
 //数据类型互转的方法
 function toString(_v, _symbol){
     // if(isNull(_v) || isStringNull(_v)) return null;
@@ -96,10 +84,11 @@ function toJSON(_v, _symbol){
     if(isString(_v)) return JSON.parse(_v);
     return undefined;
 };
+//数据转换 --- END
 
+//数据处理 --- START
 //数据处理方法
-function map(_v,fn){
-
+function myMap (_v,fn){
     const isArr = isArray(_v);
     const isobj = isStrictObject(_v);
     const isFun = isFunction(fn);
@@ -111,24 +100,31 @@ function map(_v,fn){
     }else{
         for(let key in _v){
             if(isFun) fn(key, _v[key], _v);
-        }
+        };
     }
+ }
+//数据处理 --- END
 
+//向外提供接口
+module.exports = {
+    //typeof
+    isNumber: isNumber,
+    isStNumber: isStrictNumber,
+	isString: isString,
+	isStString: isStrictString,
+    isNull:isNull,
+    isStNull:isStrictNull,
+    isArray: isArray,
+    isAllObject: isAllObject,
+    isObject: isObject,
+    isStObject:isStrictObject,
+    isBasicType:isBasicType,
+    isFunction: isFunction,
+    isSto: isStorage,
+    //type swtich
+    toStr: toString,
+    toArr: toArray,
+    toObj: toObject,
+    //methods
+    map: map
 };
-
-
-// number 处理
-//千分位，多分位
-function splitNum(num,_len,_type){
-
-    if(!num) return 0;
-    num = toString(num.replace(/\,/g,''));
-    _len = isStrictNumber(_len) ? _len : '3';
-    _type = isStrictString(_type) && _type !== 'a' ? 's' : 'a';
-
-    const res = 0;
-    res = num.split('').reverse().join('').replace(/(\d{_len}(?=\d)(?!\d+\.|$))/g, '$1,').split('').reverse().join('');
-    if(_type === 'a') res = res.split(',');
-    return res;
-
-}
