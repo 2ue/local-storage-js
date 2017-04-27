@@ -30,13 +30,14 @@ set(['name','nicName'],['2ue'])//name:'2ue',nicName:''
 set(['name','nicName'],['2ue','monork'])//name:'2ue',nicName:'monork'
 set(['name','nicName'],['2ue','monork','duoyude'])//name:'2ue',nicName:'monork'
 set(['name','nicName'],{name:'2ue',nicName:'monork'})//自动根据前面拆分的key匹配{name:'2ue',nicName:'monork'}中相同的key值
+```
 
 `setAll(_obj)`  
 
-- 作用：批量写入，不会覆盖清除以前数据
+- 作用：批量写入，不会清除以前数据
 
 - _obj类型为object，表示需要写入的数据。必须参数。
-- 此方法会对对_obj循环，然后每次都会调用set(_key,_obj[_key]);
+- 此方法会对_obj遍历（不支持多维深度遍历），每次都会调用set(_key,_obj[_key]);
 
 ``` javascript
 setAll({'["nannn",999]':[888],'nicName4':{test:'uuuu',uuu:8777}})
@@ -44,7 +45,7 @@ setAll({'["nannn",999]':[888],'nicName4':{test:'uuuu',uuu:8777}})
 
 `coverAll(_obj)` 
 
-- 作用：批量覆盖写入，设置之前会清空localstorage，不依赖于setAll()方法
+- 作用：批量覆盖写入，写入之前会清空localstorage，不依赖于setAll()方法
 - _obj同setAll()
 
 `get(_key,_type)`  
