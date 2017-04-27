@@ -13,7 +13,7 @@ function store (obj){
 store.prototype = {
 
     _init: function(obj){
-        const DEFAULT_OPTIONS = {
+        var DEFAULT_OPTIONS = {
             isClear: false,//是否先清除localstorage
             clearAllTime: 5000,//是否定时清除所有数据，不设置表示不清除，并设置时间，单位ms
             clearSingleTime:5000,//设置默认单个清除时间，不设置表示不清除，并设置时间，单位ms
@@ -52,10 +52,10 @@ function set(_key,_v,_t){
     //_t为定时清除localstorage，类型为number，单位为ms
     //验证_key是否为空，string，arry
 
-    const isStr = isString(_key);
-    const isArr = isArray(_key);
-    const isArrV = isArray(_v);
-    const isObjV = isStrictObject(_v);
+    var isStr = isString(_key);
+    var isArr = isArray(_key);
+    var isArrV = isArray(_v);
+    var isObjV = isStrictObject(_v);
 
     if(!isStr || !isArr) return;
     var keys = isArr  ? _key : (isStr && _key.indexOf('[') === 0) ? JSON.parse(_key) : [_key];
@@ -99,9 +99,9 @@ function coverAll(_data,_t){
 //get相关
 //获取数据
 function get(_key,_type){
-    const isStr = isString(_key);
-    const isArr = isString(_key);
-    const isObj = isStrictObject(_key);
+    var isStr = isString(_key);
+    var isArr = isString(_key);
+    var isObj = isStrictObject(_key);
 
     if(!isStr && !isArr && !isObj) return;
     _type = isStr ? 'string' : 'object';

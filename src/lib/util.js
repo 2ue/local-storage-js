@@ -51,7 +51,7 @@ function isStorage(_v){
     return Object.prototype.toString.call(_v) === '[object Storage]';
 };
 function isBasicType(_v){
-    const _type = typeof _v;
+    var _type = typeof _v;
     return _type === 'undefined' || _type === 'number' || _type === 'string' || type === 'boolean';
 };
 
@@ -89,9 +89,9 @@ function toJSON(_v, _symbol){
 //数据处理 --- START
 //数据处理方法
 function myMap (_v,fn){
-    const isArr = isArray(_v);
-    const isobj = isStrictObject(_v);
-    const isFun = isFunction(fn);
+    var isArr = isArray(_v);
+    var isobj = isStrictObject(_v);
+    var isFun = isFunction(fn);
     if(!isArr && !isobj) return;
     if(isArr){
         for(let i = 0; i < _v.length; i++){
