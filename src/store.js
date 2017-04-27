@@ -39,12 +39,6 @@ store.prototype = {
 
 }
 
-//抽象方法
-// function getItem(_key,_v,_v){
-//     if()
-// }
-
-
 //API START
 //添加数据
 function set(_key,_v,_t){
