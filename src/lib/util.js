@@ -126,5 +126,5 @@ module.exports = {
     toArr: toArray,
     toObj: toObject,
     //methods
-    myMap: myMap
+    map: myMap
 };

@@ -1,8 +1,8 @@
 //封装一些简单的localstorage API
 
 //超出localstorage大小限制时怎么处理：新增的时候超出，改变值的时候超出
-
 ;
+var util = require('./lib/util.js');
 var localStorage = window.localStorage;
 // localStorage.clear()
 
@@ -20,10 +20,10 @@ store.prototype = {
             limitSize:5//大小限制，单位MB
         };
 
-        if(!obj || _isStrictObject(obj)){
+        if(!obj || util.isStObject(obj)){
             obj = DEFAULT_OPTIONS;
         }else{
-            myMap(DEFAULT_OPTIONS,function(key,val){
+            util.map(DEFAULT_OPTIONS,function(key,val){
                 if(typeof obj[key] === 'undefined' || obj[key] == null) obj[key] = val;
             });
         };
@@ -46,10 +46,10 @@ function set(_key,_v,_t){
     //_t为定时清除localstorage，类型为number，单位为ms
     //验证_key是否为空，string，arry
 
-    var isStr = isString(_key);
-    var isArr = isArray(_key);
-    var isArrV = isArray(_v);
-    var isObjV = isStrictObject(_v);
+    var isStr = util.isString(_key);
+    var isArr = util.isArray(_key);
+    var isArrV = util.isArray(_v);
+    var isObjV = util.isStObject(_v);
 
     if(!isStr || !isArr) return;
     var keys = isArr  ? _key : (isStr && _key.indexOf('[') === 0) ? JSON.parse(_key) : [_key];
@@ -61,12 +61,12 @@ function set(_key,_v,_t){
         }else if(isObjV){
             tempV = typeof _v[keys[i]] === 'undefined' ? '' : _v[keys[i]];
         }else{
-            tempV = !_v ? '' : toString(_v);
+            tempV = !_v ? '' : util.toStr(_v);
         };
         
         localStorage.setItem(keys[i],tempV);
         //定时清除
-        if(isNumber(_t) && _t > 0){
+        if(util.isNumber(_t) && _t > 0){
             setTimeout(function() {
                 localStorage.removeItem(keys[i]);
             }, _t);
@@ -76,26 +76,26 @@ function set(_key,_v,_t){
 };
 //批量添加数据
 function setAll(_data,_t){
-    if(!_data || !isStrictObject(_data)) return;
-    myMap(_data,function(key,val){
+    if(!_data || !util.isStObject(_data)) return;
+    util.map(_data,function(key,val){
         set(key,val,_t);
     });
 };
 //覆盖批量添加数据
 function coverAll(_data,_t){
-    if(!_data || !isStrictObject(_data)) return;
+    if(!_data || !util.isStObject(_data)) return;
     //存在BUG，思考应该再判断数据类型正确之后才清空
     localStorage.clear();
-    myMap(_data,function(key){
+    util.map(_data,function(key){
         set(key,_data[key],_t);
     })
 };
 //get相关
 //获取数据
 function get(_key,_type){
-    var isStr = isString(_key);
-    var isArr = isString(_key);
-    var isObj = isStrictObject(_key);
+    var isStr = util.isString(_key);
+    var isArr = util.isString(_key);
+    var isObj = util.isStObject(_key);
 
     if(!isStr && !isArr && !isObj) return;
     _type = isStr ? 'string' : 'object';
@@ -114,7 +114,7 @@ function get(_key,_type){
 
     function getList(_arr){
         let tmpRes = {};
-        myMap(_arr,function(index,val){
+        util.map(_arr,function(index,val){
             tmpRes[val] = localStorage.getItem(val);
         })
         return tmpRes;
@@ -125,7 +125,7 @@ function get(_key,_type){
 //获取所有数据
 function getAll(){
     var res = {};
-    myMap(localStorage,function(key,val){
+    util.map(localStorage,function(key,val){
         res[key] = localStorage.getItem(key);
     })
     return res;
@@ -135,7 +135,7 @@ function getAll(){
 function has(_key){
     var res = false;
     //用hasOwnProperty？
-    myMap(localStorage,function(key){
+    util.map(localStorage,function(key){
         if(key != _key) return;
         res = true;
         break;
@@ -145,17 +145,17 @@ function has(_key){
 
 //移除key
 function remove(_key){
-    var isStr = isString(_key);
-    var isArr = isArray(_key);
-    var isStrictObj = isStrictObject(_key);
+    var isStr = util.isString(_key);
+    var isArr = util.isArray(_key);
+    var isStrictObj = util.isStObject(_key);
     if(!isStr || !isArr || !isStrictObj) return;
     _key = isArr ? _key : isStrictObj ? key : [_key];
-    myMap(_key,function(i,val){
+    util.map(_key,function(i,val){
         localStorage.removeItem(isStrictObj ? i : val);
     });
 };
 function clear(_t){
-    _t = !isNumber(_t) ? 0 : _t;
+    _t = !util.isNumber(_t) ? 0 : _t;
     setTimeout(function() {
         localStorage.clear();
     }, _t);
@@ -163,7 +163,7 @@ function clear(_t){
 
 function keys(){
     var res = [];
-    myMap(localStorage,function(key,item){
+    util.map(localStorage,function(key,item){
         res.push(key);
     });
     return res;
