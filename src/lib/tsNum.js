@@ -72,15 +72,15 @@ function jionNum (_NUM) {
     var num = splitNum(numArray[0]);
     var len = num.length;
     var reslt = '';
-    for(let i = 0; i < len; i++){
-        var temp = switchNum(num[i],i == 0);
+    num.map(function(n,i){
+        var temp = switchNum(n,i == 0);
         if(!temp) temp = NUM_ARRAY[0];
         if(len - 1 == i || temp == NUM_ARRAY[0]){
             reslt += temp;
         }else{
             reslt += (temp + NUM_UNIT_ARRAY[len - i - 2]);
         }
-    };
+    });
 
     return reslt.replace(REG_DEL_REPEAT,'$1') + (!numArray[1] ? '' : (POINT + switchDecimal(numArray[1])));
         
@@ -103,8 +103,8 @@ function splitHz(_HZ){
     var res = [];
     var temp = '';
     var location = -10000;//设置一个超大数
-    for(let i = 0; i < _HZ.length; i++){
-        var thisLocation = NUM_UNIT_ARRAY.indexOf(_HZ[i]);
+    _HZ.map(function(n,i){
+        var thisLocation = NUM_UNIT_ARRAY.indexOf(n);
         if(thisLocation >= 0){
             
             if(thisLocation - location < -1){
@@ -117,10 +117,10 @@ function splitHz(_HZ){
             location = thisLocation;
             
         }else{
-            temp += _HZ[i];
+            temp += n;
             if(i == _HZ.length - 1) res.push(temp);
         }
-    };
+    });
     return res;
 };
 
@@ -130,15 +130,15 @@ function switchHz(_HZ){
     _HZ = _HZ.split('');
     var res = 0;
     var temp = 0;
-    for(let i = 0; i < _HZ.length; i++){
+    _HZ.map(function(n,i){
         if(i % 2 == 0){
-            temp = NUM_ARRAY.indexOf(_HZ[i]);
+            temp = NUM_ARRAY.indexOf(n);
             if(i == _HZ.length - 1) res += temp;
         }else{
-            var z = 3 - UNIT_ARRAY.indexOf(_HZ[i]);
+            var z = 3 - UNIT_ARRAY.indexOf(n);
             res += (temp * Math.pow(10,z));
         }
-    }
+    });
     return res;
 
 };
@@ -149,7 +149,6 @@ function switchDecimalHz(_HZ){
     var res = ['.'];
     _HZ.map(function(n){
         res.push(NUM_ARRAY.indexOf(n));
-        
     });
     return res.join('');
 };
@@ -160,10 +159,10 @@ function jionHz(_HZ){
     var HZ_ARRY = splitHz(_HZ[0]);
     var decimalPart = switchDecimalHz(_HZ[1]);
     var res = '';
-    for(let i = 0; i < HZ_ARRY.length; i++){
-        var temp = switchHz(HZ_ARRY[i]);
+    HZ_ARRY.map(function(n){
+        var temp = switchHz(n);
         res = res + '' + temp;
-    };
+    });
     return res + decimalPart;
 };
 console.log(jionHz('三十穰零五千六百七十四京七千七百四十兆二千三百亿二千三百零五万零七百八十九点八八九九零九'))
