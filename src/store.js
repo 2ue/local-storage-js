@@ -32,8 +32,33 @@ store.prototype = {
     },
     _methods: function(){
         var _self = this;
-        _self.get = function(_key,_v,_t){
+        _self.set = function(_key,_v,_t){
+            var isStr = util.isString(_key);
+            var isArr = util.isArray(_key);
+            var isArrV = util.isArray(_v);
+            var isObjV = util.isStObject(_v);
 
+            if(!isStr || !isArr) return;
+            var keys = isArr  ? _key : (isStr && _key.indexOf('[') === 0) ? JSON.parse(_key) : [_key];
+            for(let i = 0; i < keys.length; i++){
+                var tempV = '';
+                if(isArrV){
+                    _v.length = keys.length;
+                    tempV = typeof _v[i] === 'undefined' ? '' : _v[i];
+                }else if(isObjV){
+                    tempV = typeof _v[keys[i]] === 'undefined' ? '' : _v[keys[i]];
+                }else{
+                    tempV = !_v ? '' : util.toStr(_v);
+                };
+                
+                localStorage.setItem(keys[i],tempV);
+                //定时清除
+                if(util.isNumber(_t) && _t > 0){
+                    setTimeout(function() {
+                        localStorage.removeItem(keys[i]);
+                    }, _t);
+                }
+            }
         }
     }
 
