@@ -76,7 +76,7 @@ function set(_key,_v,_t){
     var isArrV = util.isArray(_v);
     var isObjV = util.isStObject(_v);
 
-    if(!isStr || !isArr) return;
+    if(!isStr && !isArr) return;
     var keys = isArr  ? _key : (isStr && _key.indexOf('[') === 0) ? JSON.parse(_key) : [_key];
     for(let i = 0; i < keys.length; i++){
         var tempV = '';
@@ -124,21 +124,19 @@ function get(_key,_type){
 
     if(!isStr && !isArr && !isObj) return;
     _type = isStr ? 'string' : 'object';
-    var res = {};
+    var res;
     if(isObj){
         for(let key in _key){
             res[key] = getList(_key[key]);
         }
     }else{
-        _key = isStr ? [_key] : _key;
-        res = getList(_key);
-
+        res = localStorage.getItem(_key);
     };
 
     return res;
 
     function getList(_arr){
-        let tmpRes = {};
+        let tmpRes = isStr ? '' : {};
         util.map(_arr,function(index,val){
             tmpRes[val] = localStorage.getItem(val);
         })
@@ -161,9 +159,10 @@ function has(_key){
     var res = false;
     //用hasOwnProperty？
     util.map(localStorage,function(key){
+        console.log(key)
         if(key != _key) return;
         res = true;
-        break;
+        // break;
     })
     return res;
 };
@@ -195,3 +194,7 @@ function keys(){
 }
 
 //API END
+
+
+set("name","jieyuanfei");
+console.log(get('name'))

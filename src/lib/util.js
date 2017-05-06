@@ -26,7 +26,7 @@ function isNull(_v){
     return !_v && typeof _v === 'object';
 };
 //判断是否为''(不能识别null)
-function isStringNull(_v){
+function isStrictNull(_v){
     return !_v && typeof _v === 'string' && isNaN(_v);
 };
 function isArray(_v){
@@ -59,6 +59,7 @@ function isBasicType(_v){
 function isOwnPro(obj,key){
     return isStrictObject(obj) && isString(key) && obj.hasOwnProperty(key);
 };
+
 
 //类型检测 --- END
 
@@ -124,7 +125,7 @@ module.exports = {
     //type swtich
     toStr: toString,
     toArr: toArray,
-    toObj: toObject,
+    toObj: toJSON,
     //methods
     map: myMap
 };
