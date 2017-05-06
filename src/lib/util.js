@@ -4,55 +4,70 @@
 //类型检测 --- START
 
 //判断数字(非严格)
-function isNumber(_v){
-    return !isNaN(_v);
+//字符串'`1`'会被识别成`number`
+function isNumber(para){
+    return !isNaN(para);
 };
 //判断数字(严格)
-//在必要的情况下使用，因为此种方法会把''1''识别成`string`类型
-function isStrictNumber(_v){
-    return !isNaN(_v) && typeof _v === 'number';
+//在必要的情况下使用：此方法会把字符串'`1`'识别成`string`类型
+function isStrictNumber(para){
+    return !isNaN(para) && typeof para === 'number';
 };
 //判断字符串（非严格）
-function isString(_v){
-    return typeof _v === 'string';
+function isString(para){
+    return typeof para === 'string';
 };
 //判断字符串（严格）
-//在必要的情况下使用，因为此种方法会把'1'识别成`number`类型
-function isStrictString(_v){
-    return isNaN(_v) && typeof _v === 'string';
+//在必要的情况下使用：此种方法会把字符串'`1`'识别成`number`类型
+function isStrictString(para){
+    return isNaN(para) && typeof para === 'string';
 };
-//判断是否为Null(不能识别'')
-function isNull(_v){
-    return !_v && typeof _v === 'object';
+//判断是否为null(不能识别'')
+//此方法只能识别`null`，如果要包含''，请结合方法`isStringNull()`一起使用
+function isNull(para){
+    return !para && typeof para === 'object';
 };
-//判断是否为''(不能识别null)
-function isStrictNull(_v){
-    return !_v && typeof _v === 'string' && isNaN(_v);
+//判断是否为空字符串(不包含空格)
+//此方法只能识别`''`，如果要包含`null`，请结合方法`isNull()`一起使用
+function isStringNull(para){
+    return !para && typeof para === 'string' && isNaN(para);
 };
-function isArray(_v){
-    return Object.prototype.toString.call(_v) === '[object Array]';
+//判断是否为undefined
+function isUndefined(para){
+    return typeof para === 'undefined';
+};
+
+//判断是否为`false`
+//当为`null`,`undefined`,`''`,`0`,`-0`,`false`,`NaN`
+function isFalse(para){
+    return !para;
+};
+
+function isArray(para){
+    return Object.prototype.toString.call(para) === '[object Array]';
 };
 //判断字符串（非严格1--所有的obejct对象,包括null）
-function isAllObject(_v){
-    return typeof _v === 'obejct';
+function isAllObject(para){
+    return typeof para === 'obejct';
 };
 //判断字符串（非严格2--除去null的所有object对象）
-function isObject(_v){
-    return !!v && typeof _v === 'obejct';
+function isObject(para){
+    return !!v && typeof para === 'obejct';
 };
 //判断字符串（严格--只识别{}JSON对象）
-function isStrictObject(_v){
-    return Object.prototype.toString.call(_v) === '[object Object]';
+function isStrictObject(para){
+    return Object.prototype.toString.call(para) === '[object Object]';
 };
-function isFunction(_v){
-    return typeof _v === 'function';
+function isFunction(para){
+    return typeof para === 'function';
 };
-function isStorage(_v){
-    return Object.prototype.toString.call(_v) === '[object Storage]';
+function isStorage(para){
+    return Object.prototype.toString.call(para) === '[object Storage]';
 };
-function isBasicType(_v){
-    var _type = typeof _v;
-    return _type === 'undefined' || _type === 'number' || _type === 'string' || type === 'boolean';
+//判断一般数据类型(即非引用类型)
+//注意：使用typeof判断`null`结果为`object`
+function isBasicType(para){
+    return typeof para !== 'obejct';
 };
 
 //判断是否自身属性
@@ -65,42 +80,42 @@ function isOwnPro(obj,key){
 
 //数据转换 --- START
 //数据类型互转的方法
-function toString(_v, _symbol){
-    // if(isNull(_v) || isStringNull(_v)) return null;
-    if(!_v) return null;
-    if(isBasicType(_v)) return _v;
-    // if(isFunction(_v)　|| isStorage(_v)) return null;
+function toString(para, _symbol){
+    // if(isNull(para) || isStringNull(para)) return null;
+    if(!para) return null;
+    if(isBasicType(para)) return para;
+    // if(isFunction(para)　|| isStorage(para)) return null;
     _symbol = !_symbol ? '&' : _symbol;
-    // console.log(isArray(_v))
-    if(isArray(_v)) return _v.join(_symbol);
-    if(isStrictObject(_v) || isFunction(_v)　|| isStorage(_v)) return JSON.stringify(_v);
-    return _v;
+    // console.log(isArray(para))
+    if(isArray(para)) return para.join(_symbol);
+    if(isStrictObject(para) || isFunction(para)　|| isStorage(para)) return JSON.stringify(para);
+    return para;
 
 };
-function toArray(_v, _symbol){
-    if(isString(_v)) return _v.split(!_symbol ? '&' : _symbol);
+function toArray(para, _symbol){
+    if(isString(para)) return para.split(!_symbol ? '&' : _symbol);
     return undefined;
 };
-function toJSON(_v, _symbol){
-    if(isString(_v)) return JSON.parse(_v);
+function toJSON(para, _symbol){
+    if(isString(para)) return JSON.parse(para);
     return undefined;
 };
 //数据转换 --- END
 
 //数据处理 --- START
 //数据处理方法
-function myMap (_v,fn){
-    var isArr = isArray(_v);
-    var isobj = isStrictObject(_v);
+function myMap (para,fn){
+    var isArr = isArray(para);
+    var isobj = isStrictObject(para);
     var isFun = isFunction(fn);
     if(!isArr && !isobj) return;
     if(isArr){
-        for(let i = 0; i < _v.length; i++){
-            if(isFun) fn(i, _v[i], _v);
+        for(let i = 0; i < para.length; i++){
+            if(isFun) fn(i, para[i], para);
         };
     }else{
-        for(let key in _v){
-            if(isFun) fn(key, _v[key], _v);
+        for(let key in para){
+            if(isFun) fn(key, para[key], para);
         };
     }
  }
@@ -113,13 +128,15 @@ module.exports = {
     isStNumber: isStrictNumber,
 	isString: isString,
 	isStString: isStrictString,
-    isNull:isNull,
-    isStNull:isStrictNull,
+    isNull: isNull,
+    isStNull: isStringNull,
+    isUndefined: isUndefined,
+    isFalse: isFalse,
     isArray: isArray,
     isAllObject: isAllObject,
     isObject: isObject,
-    isStObject:isStrictObject,
-    isBasicType:isBasicType,
+    isStObject: isStrictObject,
+    isBasicType: isBasicType,
     isFunction: isFunction,
     isSto: isStorage,
     //type swtich

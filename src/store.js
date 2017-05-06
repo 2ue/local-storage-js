@@ -67,7 +67,7 @@ store.prototype = {
 //API START
 //添加数据
 function set(_key,_v,_t){
-    //_key支持string，array
+    //_key允许为string，array
     //_t为定时清除localstorage，类型为number，单位为ms
     //验证_key是否为空，string，arry
 
@@ -118,6 +118,7 @@ function coverAll(_data,_t){
 //get相关
 //获取数据
 function get(_key,_type){
+    //当_key只允许string、array和object类型
     var isStr = util.isString(_key);
     var isArr = util.isString(_key);
     var isObj = util.isStObject(_key);
