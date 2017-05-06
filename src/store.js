@@ -196,5 +196,6 @@ function keys(){
 //API END
 
 
+//test
 set("name","jieyuanfei");
 console.log(get('name'))
