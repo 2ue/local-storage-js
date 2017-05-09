@@ -87,7 +87,7 @@ store.prototype = {
         //获取数据
         _self.get = function (_key,_type){
             var isStr = util.isString(_key);
-            var isArr = util.isString(_key);
+            var isArr = util.isArray(_key);
             var isObj = util.isStObject(_key);
 
             if(!isStr && !isArr && !isObj) return;
