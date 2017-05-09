@@ -46,13 +46,13 @@ function isFalse(para){
 function isArray(para){
     return Object.prototype.toString.call(para) === '[object Array]';
 };
-//判断字符串（非严格1--所有的obejct对象,包括null）
+//判断字符串（非严格1--所有的object对象,包括null）
 function isAllObject(para){
-    return typeof para === 'obejct';
+    return typeof para === 'object';
 };
 //判断字符串（非严格2--除去null的所有object对象）
 function isObject(para){
-    return !!v && typeof para === 'obejct';
+    return !!v && typeof para === 'object';
 };
 //判断字符串（严格--只识别{}JSON对象）
 function isStrictObject(para){
@@ -67,7 +67,7 @@ function isStorage(para){
 //判断一般数据类型(即非引用类型)
 //注意：使用typeof判断`null`结果为`object`
 function isBasicType(para){
-    return typeof para !== 'obejct';
+    return typeof para !== 'object';
 };
 
 //判断是否自身属性
@@ -81,12 +81,9 @@ function isOwnPro(obj,key){
 //数据转换 --- START
 //数据类型互转的方法
 function toString(para, _symbol){
-    // if(isNull(para) || isStringNull(para)) return null;
     if(!para) return null;
     if(isBasicType(para)) return para;
-    // if(isFunction(para)　|| isStorage(para)) return null;
     _symbol = !_symbol ? '&' : _symbol;
-    // console.log(isArray(para))
     if(isArray(para)) return para.join(_symbol);
     if(isStrictObject(para) || isFunction(para)　|| isStorage(para)) return JSON.stringify(para);
     return para;
@@ -105,10 +102,11 @@ function toJSON(para, _symbol){
 //数据处理 --- START
 //数据处理方法
 function myMap (para,fn){
+    var isBasic = isBasicType(para);
+    var isNl = isNull(para);
     var isArr = isArray(para);
-    var isobj = isStrictObject(para);
     var isFun = isFunction(fn);
-    if(!isArr && !isobj) return;
+    if(isBasic || isNl) return;
     if(isArr){
         for(let i = 0; i < para.length; i++){
             if(isFun) fn(i, para[i], para);
@@ -129,7 +127,7 @@ module.exports = {
 	isString: isString,
 	isStString: isStrictString,
     isNull: isNull,
-    isStNull: isStringNull,
+    isStringNull: isStringNull,
     isUndefined: isUndefined,
     isFalse: isFalse,
     isArray: isArray,
