@@ -5,7 +5,7 @@
 
 var util = require('./lib/util.js');
 
-
+//初始化实例
 function store (obj){
     this._init(obj);
 };
