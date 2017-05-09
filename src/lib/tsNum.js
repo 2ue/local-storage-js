@@ -15,6 +15,7 @@ var REG_SPLIT_LEN = /(\d{4}(?=\d)(?!\d+\.|$))/g;
 //反向四位分割字符串
 var REG_SPLIT_LEN_R = /(\d{1,4})(?=(?:\d{4})+(?!\d))/g;
 
+//转换成汉字
 //分割整数和小数部分
 function dealNum(_NUM){
     if(!_NUM || isNaN(_NUM)) return [];
