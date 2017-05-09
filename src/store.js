@@ -167,7 +167,3 @@ store.prototype = {
 
 //向外提供接口
 module.exports = store;
-
-var storejs = new store();
-storejs.set(['name','nicName'],['jieyuanfei','2ue']);
-console.log(storejs.getAll());
