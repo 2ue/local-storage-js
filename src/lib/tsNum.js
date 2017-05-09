@@ -1,9 +1,9 @@
 //阿拉伯数字转换为中文 
 
-// 注意当数字超出js极限之后，请以字符串的形式传入
+// 如数值过大，建议以字符串的形式传入
 
 ;
-//默认配置
+//设置一些默认参数
 var UNIT_ARRAY = ['千','百','十'];
 var POINT = '点';
 var NUM_ARRAY = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
@@ -83,10 +83,9 @@ function jionNum (_NUM) {
     });
 
     return reslt.replace(REG_DEL_REPEAT,'$1') + (!numArray[1] ? '' : (POINT + switchDecimal(numArray[1])));
-        
 };
 
-console.log(jionNum('300000000056747740230023050789.889909000'));
+// console.log(jionNum('300000000056747740230023050789.889909000'));
 //三十穰零五千六百七十四京七千七百四十兆二千三百亿二千三百零五万零七百八十九点八八九九零九
 
 //转换成数字
@@ -165,12 +164,12 @@ function jionHz(_HZ){
     });
     return res + decimalPart;
 };
-console.log(jionHz('三十穰零五千六百七十四京七千七百四十兆二千三百亿二千三百零五万零七百八十九点八八九九零九'))
+// console.log(jionHz('三十穰零五千六百七十四京七千七百四十兆二千三百亿二千三百零五万零七百八十九点八八九九零九'))
 //期望：300000000056747740230023050789.889909
 //实际：30000000005674774023002305789.889909
 
 //向外提供接口
 module.exports = {
-    tsNum: jionNum,
-    tsHz: jionHz
+    toHz: jionNum,
+    toNum: jionHz
 };
