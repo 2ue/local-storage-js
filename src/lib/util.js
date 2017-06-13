@@ -25,12 +25,12 @@ function isStrictString(para){
 //判断是否为null(不能识别'')
 //此方法只能识别`null`，如果要包含''，请结合方法`isStringNull()`一起使用
 function isNull(para){
-    return !para && typeof para === 'object';
+    return para === null;
 };
 //判断是否为空字符串(不包含空格)
 //此方法只能识别`''`，如果要包含`null`，请结合方法`isNull()`一起使用
 function isStringNull(para){
-    return !para && typeof para === 'string' && isNaN(para);
+    return para === '';
 };
 //判断是否为undefined
 function isUndefined(para){
@@ -52,7 +52,7 @@ function isAllObject(para){
 };
 //判断字符串（非严格2--除去null的所有object对象）
 function isObject(para){
-    return !!v && typeof para === 'object';
+    return !!para && typeof para === 'object';
 };
 //判断字符串（严格--只识别{}JSON对象）
 function isStrictObject(para){
@@ -71,7 +71,7 @@ function isBasicType(para){
 };
 
 //判断是否自身属性
-function isOwnPro(obj,key){
+function isOwnProp(obj,key){
     return isStrictObject(obj) && isString(key) && obj.hasOwnProperty(key);
 };
 

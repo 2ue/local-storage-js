@@ -3,7 +3,7 @@
 //超出localstorage大小限制时怎么处理：新增的时候超出，改变值的时候超出
 ;
 
-var util = require('./lib/util.js');
+const util = require('./lib/util.js');
 
 //初始化实例
 function store (obj){
@@ -13,7 +13,7 @@ function store (obj){
 store.prototype = {
 
     _init: function(obj){
-        var DEFAULT_OPTIONS = {
+        const DEFAULT_OPTIONS = {
             isClear: false, //是否先清除localstorage
             // clearAllTime: 5000, //是否定时清除所有数据，不设置表示不清除，并设置时间，单位ms
             // clearSingleTime:5000, //设置默认单个清除时间，不设置表示不清除，并设置时间，单位ms
@@ -33,22 +33,22 @@ store.prototype = {
         if(this._options.isClear) this.clear();
     },
     _initMethods: function(){
-        var _self = this;
+        const _self = this;
         //添加数据
         _self.set = function (_key,_v,_t){
             
             //_key支持string，array
             //_t为定时清除localstorage，类型为number，单位为ms
             //验证_key是否为空，string，arry
-            var isStr = util.isString(_key);
-            var isArr = util.isArray(_key);
-            var isArrV = util.isArray(_v);
-            var isObjV = util.isStObject(_v);
+            const isStr = util.isString(_key);
+            const isArr = util.isArray(_key);
+            const isArrV = util.isArray(_v);
+            const isObjV = util.isStObject(_v);
 
             if(!isStr && !isArr) return;
-            var keys = isArr  ? _key : (isStr && _key.indexOf('[') === 0) ? JSON.parse(_key) : [_key];
+            const keys = isArr  ? _key : (isStr && _key.indexOf('[') === 0) ? JSON.parse(_key) : [_key];
             for(let i = 0; i < keys.length; i++){
-                var tempV = '';
+                let tempV = '';
                 if(isArrV){
                     _v.length = keys.length;
                     tempV = typeof _v[i] === 'undefined' ? '' : _v[i];
@@ -86,13 +86,13 @@ store.prototype = {
         //get相关
         //获取数据
         _self.get = function (_key,_type){
-            var isStr = util.isString(_key);
-            var isArr = util.isArray(_key);
-            var isObj = util.isStObject(_key);
+            const isStr = util.isString(_key);
+            const isArr = util.isArray(_key);
+            const isObj = util.isStObject(_key);
 
             if(!isStr && !isArr && !isObj) return;
             _type = isStr ? 'string' : 'object';
-            var res;
+            let res;
             if(isObj){
                 for(let key in _key){
                     res[key] = getList(_key[key]);
@@ -115,7 +115,7 @@ store.prototype = {
 
         //获取所有数据
         _self.getAll = function (){
-            var res = {};
+            let res = {};
             util.map(_self.localStorage,function(key,val){
                 res[key] = _self.localStorage.getItem(key);
             })
@@ -124,7 +124,7 @@ store.prototype = {
 
         //判断是否包含key
         _self.has = function (_key){
-            var res = false;
+            let res = false;
             //用hasOwnProperty？
             util.map(_self.localStorage,function(key){
                 if(key != _key) return;
@@ -136,9 +136,9 @@ store.prototype = {
 
         //移除key
         _self.remove = function(_key,_t){
-            var isStr = util.isString(_key);
-            var isArr = util.isArray(_key);
-            var isStrictObj = util.isStObject(_key);
+            const isStr = util.isString(_key);
+            const isArr = util.isArray(_key);
+            const isStrictObj = util.isStObject(_key);
             if(!isStr || !isArr || !isStrictObj) return;
             _key = isArr ? _key : isStrictObj ? key : [_key];
             util.map(_key,function(i,val){
@@ -155,7 +155,7 @@ store.prototype = {
         };
 
         _self.keys = function (){
-            var res = [];
+            let res = [];
             util.map(_self.localStorage,function(key,item){
                 res.push(key);
             });
