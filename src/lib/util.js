@@ -80,15 +80,6 @@ function isOwnProp(obj,key){
 
 //数据转换 --- START
 //数据类型互转的方法
-function toString(para, _symbol){
-    if(!para) return null;
-    if(isBasicType(para)) return para;
-    _symbol = !_symbol ? '&' : _symbol;
-    if(isArray(para)) return para.join(_symbol);
-    if(isStrictObject(para) || isFunction(para)　|| isStorage(para)) return JSON.stringify(para);
-    return para;
-
-};
 function toArray(para, _symbol){
     if(isString(para)) return para.split(!_symbol ? '&' : _symbol);
     return undefined;
@@ -138,7 +129,6 @@ module.exports = {
     isFunction: isFunction,
     isSto: isStorage,
     //type swtich
-    toStr: toString,
     toArr: toArray,
     toObj: toJSON,
     //methods
