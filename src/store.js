@@ -59,7 +59,7 @@ store.prototype = {
                     } else if (isObjV) {
                         tempV = typeof _v[key] === 'undefined' ? '' : _v[key];
                     } else {
-                        tempV = JSON.stringify(_v);
+                        tempV = _v;
                     };
 
                     _self.localStorage.setItem(key, JSON.stringify(tempV));
