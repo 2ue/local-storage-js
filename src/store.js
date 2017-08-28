@@ -50,7 +50,6 @@ store.prototype = {
             //先判断才能使用JSON.stringify(_v)
             if (isStr) {
                 _self.localStorage.setItem(keys, JSON.stringify(_v));
-                _self.clearOne(_key);
             } else {
                 util.map(_key, function (i, key) {
                     let tempV = '';
@@ -63,8 +62,6 @@ store.prototype = {
                     };
 
                     _self.localStorage.setItem(key, JSON.stringify(tempV));
-                    //定时清除
-                    _self.clearOne(keys[i])
                 })
             }
         };
@@ -156,7 +153,7 @@ store.prototype = {
             _self.localStorage.removeItem(_key);
         };
         //全部清除
-        _self.clear = function () {
+        _self.remove = function () {
             _self.localStorage.clear();
         };
     }
