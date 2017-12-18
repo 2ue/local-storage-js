@@ -1,0 +1,9 @@
+.git
+.idea
+.project
+.vscode
+.histroy
+.log
+node_modules/*
+doc/*
+index.html

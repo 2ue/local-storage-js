@@ -1,164 +1,182 @@
-//封装一些简单的localstorage API
+/*
+ * @Author: 2ue 
+ * @Date: 2017-3-18 13:02:55
+ * @Last Modified by: 2ue
+ * @Last Modified time: 2017-12-18 16:30:02
+ * @descrition: 对localstorage的一些简单封装，支持CMD,ADM,NODE各种模式
+ * @ps: 未对不支持localstorage的浏览器做兼容处理
+ */
 
-//超出localstorage大小限制时怎么处理：新增的时候超出，改变值的时候超出
 ;
+(function (root, factory) {
 
-const util = require('./lib/util.js');
+    //对不支持localstorage的平台，做回退处理
+    if (typeof factory !== 'object') {
+        console.log('不支持localstorage!');
+        return;
+    }
+    //兼容ADM,CMD,NODE等平台
+    if (typeof define === 'function' && define.amd) {
+        // AMD
+        define(factory)
+    } else if (typeof exports === 'object') {
+        // Node, CommonJS-like
+        module.exports = factory()
+    } else {
+        root.store = factory()
+    }
 
-//初始化实例
-function store(obj) {
-    this._init(obj);
-};
-
-store.prototype = {
-
-    _init: function (obj) {
-        this.localStorage = window.localStorage;
-        this.setOption();
-    },
-    //只能通过此方法对参数进行配置
-    setOption: function () {
-        const DEFAULT_OPTIONS = {
-            limitSize: 5 //大小限制，单位MB
-        };
-
-        if (!obj || util.isStObject(obj)) {
-            obj = DEFAULT_OPTIONS;
-        } else {
-            util.map(DEFAULT_OPTIONS, function (key, val) {
-                if (typeof obj[key] === 'undefined' || obj[key] == null) obj[key] = val;
-            });
-        };
-        this._options = obj;
-        this._initMethods();
-    },
-    _initMethods: function () {
-        const _self = this;
-        //添加数据
-        _self.setItem = function (_key, _v) {
-
-            //_key支持string，array
-            //验证_key是否为空，string，arry
-            const isStr = util.isString(_key);
-            const isArr = util.isArray(_key);
-            const isStrV = util.isString(_v);
-            const isArrV = util.isArray(_v);
-            const isObjV = util.isStObject(_v);
-
-            if (!isStr && !isArr) return;
-            //TO DO
-            //先判断才能使用JSON.stringify(_v)
-            if (isStr) {
-                _self.localStorage.setItem(keys, JSON.stringify(_v));
+}(this, function () {
+    var _store = localStorage || window.localStorage;
+    //检测是否支持localstorage
+    if (!_store) return;
+    var _util = {
+        getType: function (para) {
+            var type = typeof para;
+            if (type === "number" && isNaN(para)) return "NaN";
+            if (type !== "object") return type;
+            return Object.prototype.toString
+                .call(para)
+                .replace(/[\[\]]/g, "")
+                .split(" ")[1]
+                .toLowerCase();
+        },
+        map: function (para, fn) {
+            var paraType = _util.getType(para);
+            var fnType = _util.getType(fn);
+            if (paraType === 'array') {
+                for (var i = 0; i < para.length; i++) {
+                    if (fnType === 'function') fn(i, para[i], para);
+                };
+            } else if (paraType === 'object') {
+                for (var key in para) {
+                    if (fnType === 'function') fn(key, para[key], para);
+                };
             } else {
-                util.map(_key, function (i, key) {
-                    let tempV = '';
-                    if (isArrV) {
-                        tempV = typeof _v[i] === 'undefined' ? '' : _v[i];
-                    } else if (isObjV) {
-                        tempV = typeof _v[key] === 'undefined' ? '' : _v[key];
+                console.log('必须为数组或Json对象')
+            }
+        },
+        //过滤值
+        filterValue: function (val) {
+            var valType = _util.getType(val), nullVal = ['null', 'undefined', 'NaN'], stringVal = ['boolen', 'number', 'string'];
+            console.log('valType==>', valType)
+            if (nullVal.indexOf(valType) >= 0) return '';
+            if (stringVal.indexOf(valType) >= 0) return val;
+            return JSON.stringify(val);
+        }
+    }
+
+    return {
+
+        /**
+         * @function 设置值 替代和增强localStorage的setItem方法
+         * @param {string, array, object} _k 必须参数，当为array, object时，类似解构赋值
+         * @param {any} _v 非必须参数，当_k为obejct时，会忽略此参数 
+         * @param {Boolen} _d 非必须，默认为false，是否开启深度遍历赋值
+         */
+        setItem: function (_k, _v, _d) {
+            var _this = this;
+            var keyType = _util.getType(_k);
+            var valType = _util.getType(_v);
+
+            if (keyType === 'string') {
+                _store.setItem(_k, _util.filterValue(_v));
+            } else if (keyType === 'array') {
+                _util.map(_k, function (i, key) {
+                    var val = valType === 'array' ? _v[i] : valType === 'object' ? _v[key] : _v;
+                    if (_d) {
+                        _this.setItem(key, val);
                     } else {
-                        tempV = _v;
-                    };
-
-                    _self.localStorage.setItem(key, JSON.stringify(tempV));
+                        _store.setItem(key, val);
+                    }
                 })
-            }
-        };
-        //批量添加数据
-        _self.setItems = function (_data) {
-            if (!_data || !util.isStObject(_data)) return;
-            util.map(_data, function (key, val) {
-                _self.set(key, val);
-            });
-        };
-        //覆盖批量添加数据
-        _self.coverSetItems = function (_data) {
-            if (!_data || !util.isStObject(_data)) return;
-            //存在BUG，思考应该再判断数据类型正确之后才清空
-            _self.localStorage.clear();
-            util.map(_data, function (key) {
-                _self.set(key, _data[key]);
-            })
-        };
-        //get相关
-        //获取数据
-        _self.getVal = function (_key, _type) {
-            const isStr = util.isString(_key);
-            const isArr = util.isArray(_key);
-            const isObj = util.isStObject(_key);
-
-            if (!isStr && !isArr && !isObj) return;
-            _type = isStr ? 'string' : 'object';
-            let res;
-            if (isObj) {
-                for (let key in _key) {
-                    res[key] = getList(_key[key]);
-                }
+            } else if (keyType === 'object') {
+                _util.map(_k, function (key, val) {
+                    if (_d) {
+                        _this.setItem(key, val);
+                    } else {
+                        _store.setItem(key, val);
+                    }
+                });
             } else {
-                res = _self.localStorage.getItem(_key);
-            };
-
-            return res;
-
-            function getList(_arr) {
-                let tmpRes = isStr ? '' : {};
-                util.map(_arr, function (index, val) {
-                    tmpRes[val] = _self.localStorage.getItem(val);
-                })
-                return tmpRes;
+                console.log('key只能为字符串或者数组')
             }
 
-        };
+        },
 
-        //获取所有数据
-        _self.getAll = function () {
-            let res = {};
-            util.map(_self.localStorage, function (key, val) {
-                res[key] = _self.localStorage.getItem(key);
+        /**
+         * @function 获取数据 替代和增强localStorage的getItem方法
+         * @param {string, array, object} _k 必须参数，当为array, object时，按照对应解构返回数据，深度遍历
+         */
+        getItem: function (_k) {
+            var _this = this, keyType = _util.getType(_k), res;
+            if (keyType === 'string') {
+                res = _store.getItem(key);
+            } else if (keyType === 'array') {
+                res = [];
+                _util.map(_k, function (i, val) {
+                    res.push(_this.getItem(val));
+                })
+            } else if (keyType === 'object') {
+                res = {};
+                _util.map(_k, function (key, val) {
+                    res[key] = (_this.getItem(key));
+                })
+            };
+            return res;
+        },
+
+        /**
+         * @function 获取所有数据 增强localStorage
+         * @returns 返回一个json对象
+         */
+        getItems: function () {
+            let _this = this, res = {};
+            _util.map(_store, function (key, val) {
+                res[key] = _this.getItem(key);
             })
             return res;
-        };
+        },
 
-        //获取所有的keys
-        _self.getKeys = function () {
+        /**
+         * @function 获取所有key 增强localStorage
+         * @returns 返回一个数组
+         */
+        getKeys: function () {
             let res = [];
-            util.map(_self.localStorage, function (key, item) {
+            _util.map(_store, function (key, item) {
                 res.push(key);
             });
             return res;
-        }
-        //判断是否包含某个key
-        _self.hasKey = function (_key) {
-            let res = false;
-            //用hasOwnProperty？
-            util.map(_self.localStorage, function (key, item) {
-                if (_key == key) res = true;
-            });
-            return res;
-        }
-        //批量移除key
-        _self.removeItems = function (_key) {
-            const isStr = util.isString(_key);
-            const isArr = util.isArray(_key);
-            const isStrictObj = util.isStObject(_key);
-            if (!isStr || !isArr || !isStrictObj) return;
-            keys = isStr ? [_key] : _key;
-            util.map(keys, function (i, key) {
-                _self.localStorage.removeItem(key);
-            });
-        };
-        //单个移除
-        _self.removeItem = function (_key) {
-            _self.localStorage.removeItem(_key);
-        };
-        //全部清除
-        _self.remove = function () {
-            _self.localStorage.clear();
-        };
-    }
+        },
 
-};
+        /**
+         * @function 移除key 替代和增强localStorage的removeItem
+         * @param {string, array, object} _k 必须参数，当为array, object时，深度遍历
+         */
+        removeItem: function (_k) {
+            var _this = this, keyType = _util.getType(_k);
+            keys = keyType === 'string' ? [_k] : keyType === 'array' || keyType === 'object' ? _k : [];
+            _util.map(keys, function (i, key) {
+                _this.removeItem(key);
+            });
+        },
 
-//向外提供接口
-module.exports = store;
+        /**
+         * @function 清除全部key 替代localStorage的clear
+         */
+        clear: function () {
+            _store.clear();
+        },
+
+        /**
+         * @function 判断是否包含某个key 增强localStorage
+         * @param {string} _k 必须参数
+         * @return 返回布尔值
+         */
+        hasKey: function (_k) {
+            return typeof _k !== 'undefined' && _store.hasOwnProperty(_k);
+        }
+
+    };
+}))

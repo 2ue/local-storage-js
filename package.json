@@ -1,0 +1,28 @@
+{
+  "name": "storejs",
+  "version": "0.0.1",
+  "description": "对`localstorage`的简单增强，方便应对项目中各种情况，支持`CMD`,`AMD`,`NODE`等各大模式。目前暂未对不支持`localstorage`的平台做兼容处理，所以使用之前一定要确保平台支持`localstorage`功能",
+  "main": "./src/store.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/2ue/storejs.git"
+  },
+  "keywords": [
+    "localstorage"
+  ],
+  "author": {
+    "name": "2ue",
+    "email": "jie746635835@163.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/2ue/storejs/issues"
+  },
+  "homepage": "https://github.com/2ue/storejs#readme"
+}
