@@ -2,7 +2,7 @@
 .idea
 .project
 .vscode
-.histroy
+.history
 .log
 node_modules/*
 doc/*

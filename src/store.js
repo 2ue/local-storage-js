@@ -2,7 +2,7 @@
  * @Author: 2ue 
  * @Date: 2017-3-18 13:02:55
  * @Last Modified by: 2ue
- * @Last Modified time: 2017-12-18 16:30:02
+ * @Last Modified time: 2017-12-18 17:24:56
  * @descrition: 对localstorage的一些简单封装，支持CMD,ADM,NODE各种模式
  * @ps: 未对不支持localstorage的浏览器做兼容处理
  */
@@ -11,7 +11,7 @@
 (function (root, factory) {
 
     //对不支持localstorage的平台，做回退处理
-    if (typeof factory !== 'object') {
+    if (!factory) {
         console.log('不支持localstorage!');
         return;
     }
@@ -27,7 +27,7 @@
     }
 
 }(this, function () {
-    var _store = localStorage || window.localStorage;
+    var _store = window.localStorage;
     //检测是否支持localstorage
     if (!_store) return;
     var _util = {
