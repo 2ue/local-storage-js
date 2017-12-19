@@ -1,12 +1,11 @@
 # store
 
-> 对`localstorage`的简单增强，方便应对项目中各种情况，支持`CMD`,`AMD`,`NODE`等各大模式。目前暂未对不支持`localstorage`的平台做兼容处理，所以使用之前一定要确保平台支持`localstorage`功能
+> 对`localstorage`的简单增强，方便应对项目中各种情况。目前暂未对不支持`localstorage`的平台做兼容处理，所以使用之前一定要确保平台支持`localstorage`功能
 
 ## 前言
 
 为了减少学习成本，做了以下事情:
 
-- 支持`cmd`，`amd`，`node`等各种模式
 - 最大程度的保持和原生API同名以及语义化命名
 - 最大程度的减少新增API以及API的参数
 
@@ -18,7 +17,7 @@
 
 ### 使用
 
-> 支持cmd和amd以及node等模式
+> 引入后会在window上注册全局方法store，所有的实例方法都挂载到store下
 
 ### API
 
