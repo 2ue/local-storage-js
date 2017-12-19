@@ -1,35 +1,20 @@
 /*
- * @Author: 2ue 
+ * @Author: 2ue
  * @Date: 2017-3-18 13:02:55
  * @Last Modified by: 2ue
- * @Last Modified time: 2017-12-18 17:24:56
- * @descrition: 对localstorage的一些简单封装，支持CMD,ADM,NODE各种模式
+ * @Last Modified time: 2017-12-19 09:48:45
+ * @descrition: 对localstorage的一些简单封装
  * @ps: 未对不支持localstorage的浏览器做兼容处理
  */
 
 ;
-(function (root, factory) {
-
-    //对不支持localstorage的平台，做回退处理
-    if (!factory) {
-        console.log('不支持localstorage!');
-        return;
-    }
-    //兼容ADM,CMD,NODE等平台
-    if (typeof define === 'function' && define.amd) {
-        // AMD
-        define(factory)
-    } else if (typeof exports === 'object') {
-        // Node, CommonJS-like
-        module.exports = factory()
-    } else {
-        root.store = factory()
-    }
-
-}(this, function () {
+(function (root) {
     var _store = window.localStorage;
     //检测是否支持localstorage
-    if (!_store) return;
+    if (!_store) {
+        console.log('不支持localStorage');
+        return;
+    };
     var _util = {
         getType: function (para) {
             var type = typeof para;
@@ -59,19 +44,18 @@
         //过滤值
         filterValue: function (val) {
             var valType = _util.getType(val), nullVal = ['null', 'undefined', 'NaN'], stringVal = ['boolen', 'number', 'string'];
-            console.log('valType==>', valType)
             if (nullVal.indexOf(valType) >= 0) return '';
             if (stringVal.indexOf(valType) >= 0) return val;
             return JSON.stringify(val);
         }
     }
 
-    return {
+    var store = {
 
         /**
          * @function 设置值 替代和增强localStorage的setItem方法
          * @param {string, array, object} _k 必须参数，当为array, object时，类似解构赋值
-         * @param {any} _v 非必须参数，当_k为obejct时，会忽略此参数 
+         * @param {any} _v 非必须参数，当_k为obejct时，会忽略此参数
          * @param {Boolen} _d 非必须，默认为false，是否开启深度遍历赋值
          */
         setItem: function (_k, _v, _d) {
@@ -122,7 +106,9 @@
                 _util.map(_k, function (key, val) {
                     res[key] = (_this.getItem(key));
                 })
-            };
+            } else {
+                console.log('key只能为字符串、数组和json对象')
+            }
             return res;
         },
 
@@ -179,4 +165,7 @@
         }
 
     };
-}))
+
+    window.store = store;
+
+})(window)
