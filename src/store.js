@@ -2,14 +2,14 @@
  * @Author: 2ue
  * @Date: 2017-3-18 13:02:55
  * @Last Modified by: 2ue
- * @Last Modified time: 2017-12-19 09:48:45
+ * @Last Modified time: 2017-12-19 10:03:51
  * @descrition: 对localstorage的一些简单封装
  * @ps: 未对不支持localstorage的浏览器做兼容处理
  */
 
 ;
 (function (root) {
-    var _store = window.localStorage;
+    var _store = root.localStorage || localStorage;
     //检测是否支持localstorage
     if (!_store) {
         console.log('不支持localStorage');
@@ -166,6 +166,6 @@
 
     };
 
-    window.store = store;
+    root.store = store;
 
 })(window)

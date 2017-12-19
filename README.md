@@ -15,9 +15,27 @@
 
 ## Document
 
-### 使用
+### use
 
 > 引入后会在window上注册全局方法store，所有的实例方法都挂载到store下
+
+``` bash
+npm install --save local-storage-js
+```
+
+#### script标签方式引入
+
+``` html
+<script src='./node_modules/local-storage-js/src/store.js'></script>
+```
+
+#### require方式引入
+
+``` javascript
+require('local-storage-js');
+//或者
+import form('local-storage-js');
+```
 
 ### API
 
