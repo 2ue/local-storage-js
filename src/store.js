@@ -9,7 +9,7 @@
 
 ;
 (function (root) {
-    var _store = root.localStorage || localStorage;
+    var _store = root.localStorage || (typeof localStorage !== 'undefined' ? localStorage : null);
     //检测是否支持localstorage
     if (!_store) {
         console.log('不支持localStorage');
@@ -43,9 +43,9 @@
         },
         //过滤值
         filterValue: function (val) {
-            var valType = _util.getType(val), nullVal = ['null', 'undefined', 'NaN'], stringVal = ['boolen', 'number', 'string'];
+            var valType = _util.getType(val), nullVal = ['null', 'undefined', 'NaN'], stringVal = ['boolean', 'number', 'string'];
             if (nullVal.indexOf(valType) >= 0) return '';
-            if (stringVal.indexOf(valType) >= 0) return val;
+            if (stringVal.indexOf(valType) >= 0) return String(val);
             return JSON.stringify(val);
         }
     }
@@ -71,7 +71,7 @@
                     if (_d) {
                         _this.setItem(key, val);
                     } else {
-                        _store.setItem(key, val);
+                        _store.setItem(key, _util.filterValue(val));
                     }
                 })
             } else if (keyType === 'object') {
@@ -79,7 +79,7 @@
                     if (_d) {
                         _this.setItem(key, val);
                     } else {
-                        _store.setItem(key, val);
+                        _store.setItem(key, _util.filterValue(val));
                     }
                 });
             } else {
@@ -95,7 +95,7 @@
         getItem: function (_k) {
             var _this = this, keyType = _util.getType(_k), res;
             if (keyType === 'string') {
-                res = _store.getItem(key);
+                res = _store.getItem(_k);
             } else if (keyType === 'array') {
                 res = [];
                 _util.map(_k, function (i, val) {
@@ -104,7 +104,7 @@
             } else if (keyType === 'object') {
                 res = {};
                 _util.map(_k, function (key, val) {
-                    res[key] = (_this.getItem(key));
+                    res[key] = _this.getItem(val);
                 })
             } else {
                 console.log('key只能为字符串、数组和json对象')
@@ -118,9 +118,10 @@
          */
         getItems: function () {
             let _this = this, res = {};
-            _util.map(_store, function (key, val) {
+            for (let i = 0; i < _store.length; i++) {
+                let key = _store.key(i);
                 res[key] = _this.getItem(key);
-            })
+            }
             return res;
         },
 
@@ -130,9 +131,9 @@
          */
         getKeys: function () {
             let res = [];
-            _util.map(_store, function (key, item) {
-                res.push(key);
-            });
+            for (let i = 0; i < _store.length; i++) {
+                res.push(_store.key(i));
+            }
             return res;
         },
 
@@ -142,10 +143,17 @@
          */
         removeItem: function (_k) {
             var _this = this, keyType = _util.getType(_k);
-            keys = keyType === 'string' ? [_k] : keyType === 'array' || keyType === 'object' ? _k : [];
-            _util.map(keys, function (i, key) {
-                _this.removeItem(key);
-            });
+            if (keyType === 'string') {
+                _store.removeItem(_k);
+            } else if (keyType === 'array') {
+                _util.map(_k, function (i, key) {
+                    _store.removeItem(key);
+                });
+            } else if (keyType === 'object') {
+                _util.map(_k, function (key, val) {
+                    _store.removeItem(key);
+                });
+            }
         },
 
         /**

@@ -7,7 +7,7 @@
     "doc": "doc"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -24,5 +24,10 @@
   "bugs": {
     "url": "https://github.com/2ue/storejs/issues"
   },
-  "homepage": "https://github.com/2ue/storejs#readme"
+  "homepage": "https://github.com/2ue/storejs#readme",
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.0.5",
+    "jsdom": "^26.1.0"
+  }
 }
