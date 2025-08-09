@@ -5,15 +5,16 @@
 [![Test Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](https://github.com/2ue/storejs)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> 对 `localStorage` 的全面增强，支持批量操作、复杂数据类型存储和 TypeScript 类型安全。提供了更强大、更灵活的本地存储解决方案。
+> 对 `localStorage` 的全面增强，支持批量操作、复杂数据类型存储、TTL过期时间和 TypeScript 类型安全。提供了更强大、更灵活的本地存储解决方案。
 
 ## ✨ 特性
 
 - 🚀 **完全兼容** - 保持原生 localStorage API 语义
 - 📦 **批量操作** - 支持数组和对象形式的批量存储/读取/删除
+- ⏰ **TTL过期** - 支持数据过期时间，自动清理过期数据
 - 🔒 **类型安全** - 完整的 TypeScript 类型定义
 - 🎯 **智能序列化** - 自动处理复杂数据类型
-- 🧪 **全面测试** - 36个测试用例，100% 测试覆盖率
+- 🧪 **全面测试** - 48个测试用例，100% 测试覆盖率
 - 📝 **代码质量** - ESLint + Prettier 保证代码质量
 - 🔧 **零依赖** - 轻量级，无外部依赖
 
@@ -114,14 +115,17 @@ store.setItem('key', 'value');
 
 ## 📚 API 文档
 
-### setItem(key, value, deepTraversal?)
+### setItem(key, value, options?, deepTraversal?)
 
-增强版 `localStorage.setItem`，支持多种数据类型和批量操作。
+增强版 `localStorage.setItem`，支持多种数据类型、批量操作和TTL过期时间。
 
 #### 参数说明
 
 - `key`: `string | string[] | Record<string, any>` - 存储键
 - `value`: `any` - 存储值（当 key 为 object 时可选）
+- `options`: `StorageOptions` - 存储选项，支持TTL设置
+  - `ttl`: `number` - 生存时间（毫秒）
+  - `expires`: `number` - 过期时间戳（毫秒）
 - `deepTraversal`: `boolean` - 是否深度遍历（默认 false）
 
 #### 使用示例
@@ -135,9 +139,16 @@ store.setItem('name', '张三');
 store.setItem('age', 25);
 store.setItem('user', { name: '张三', hobbies: ['游泳', '阅读'] });
 
+// TTL过期时间设置
+store.setItem('session', 'abc123', { ttl: 5000 }); // 5秒后过期
+store.setItem('token', 'jwt_token', { expires: Date.now() + 3600000 }); // 1小时后过期
+
 // 批量设置 - 数组形式
 store.setItem(['key1', 'key2', 'key3'], ['value1', 'value2', 'value3']);
 store.setItem(['theme', 'lang'], 'default'); // 所有 key 设置相同值
+
+// 批量设置带TTL - 数组形式
+store.setItem(['cache1', 'cache2'], ['data1', 'data2'], { ttl: 10000 }); // 10秒后过期
 
 // 批量设置 - 对象形式
 store.setItem({
@@ -145,6 +156,12 @@ store.setItem({
     lang: 'zh-CN',
     version: '1.0.0'
 });
+
+// 批量设置带TTL - 对象形式
+store.setItem({
+    tempData1: 'value1',
+    tempData2: 'value2'
+}, { ttl: 30000 }); // 30秒后过期
 
 // 深度遍历模式
 store.setItem({
@@ -155,7 +172,7 @@ store.setItem({
 
 ### getItem(key)
 
-增强版 `localStorage.getItem`，支持批量获取和结构化数据返回。
+增强版 `localStorage.getItem`，支持批量获取、结构化数据返回，自动处理过期数据。
 
 #### 参数说明
 
@@ -163,7 +180,7 @@ store.setItem({
 
 #### 返回值
 
-- 单个字符串键：返回 `string | null`
+- 单个字符串键：返回 `string | null`（过期数据返回 null）
 - 数组键：返回 `(string | null)[]`
 - 对象键：返回对应结构的对象
 
@@ -175,6 +192,9 @@ import store from 'local-storage-js';
 
 // 单个获取
 const name = store.getItem('name'); // string | null
+
+// 获取带TTL的数据（自动检查过期）
+const session = store.getItem('session'); // 如果过期返回 null
 
 // 批量获取 - 数组形式
 const values = store.getItem(['name', 'age', 'city']); 
@@ -189,38 +209,129 @@ const user = store.getItem({
 // 返回: { username: '张三', userAge: '25', city: null }
 ```
 
-### getItems()
+### getTTL(key)
 
-获取所有存储项。
+获取指定键的剩余TTL时间。
 
-```typescript
-import store from 'local-storage-js';
+#### 参数说明
 
-const allItems = store.getItems();
-// 返回: { name: '张三', age: '25', theme: 'dark' }
-```
+- `key`: `string` - 存储键
 
-### getKeys()
+#### 返回值
 
-获取所有存储键。
-
-```typescript
-import store from 'local-storage-js';
-
-const allKeys = store.getKeys();
-// 返回: ['name', 'age', 'theme']
-```
-
-### removeItem(key)
-
-增强版 `localStorage.removeItem`，支持批量删除。
+- `number` - 剩余时间（毫秒）
+- `null` - 没有设置TTL
+- `-1` - 已过期
 
 #### 使用示例
 
 ```typescript
 import store from 'local-storage-js';
 
-// 单个删除
+// 设置TTL数据
+store.setItem('temp', 'data', { ttl: 10000 }); // 10秒
+
+// 检查剩余时间
+const remaining = store.getTTL('temp'); // 例如: 8500 (剩余8.5秒)
+const noTTL = store.getTTL('name'); // null (没有TTL)
+
+setTimeout(() => {
+    const expired = store.getTTL('temp'); // -1 (已过期)
+}, 11000);
+```
+
+### setTTL(key, ttl)
+
+为已存在的键设置TTL时间。
+
+#### 参数说明
+
+- `key`: `string` - 存储键
+- `ttl`: `number` - TTL时间（毫秒）
+
+#### 返回值
+
+- `boolean` - 是否设置成功
+
+#### 使用示例
+
+```typescript
+import store from 'local-storage-js';
+
+// 先设置数据
+store.setItem('data', 'some value');
+
+// 后续添加TTL
+const success = store.setTTL('data', 5000); // 5秒后过期
+console.log(success); // true
+
+// 为不存在的key设置TTL
+const failed = store.setTTL('nonexistent', 5000);
+console.log(failed); // false
+```
+
+### clearExpired()
+
+手动清理所有过期数据。
+
+#### 返回值
+
+- `string[]` - 被清理的键名列表
+
+#### 使用示例
+
+```typescript
+import store from 'local-storage-js';
+
+// 设置一些带TTL的数据
+store.setItem('temp1', 'data1', { ttl: 1000 }); // 1秒过期
+store.setItem('temp2', 'data2', { ttl: 2000 }); // 2秒过期
+store.setItem('permanent', 'data3'); // 永久数据
+
+// 等待过期
+setTimeout(() => {
+    const cleaned = store.clearExpired();
+    console.log(cleaned); // ['temp1', 'temp2']
+    
+    console.log(store.hasKey('temp1')); // false
+    console.log(store.hasKey('permanent')); // true
+}, 3000);
+```
+
+### getItems()
+
+获取所有存储项，自动过滤过期数据。
+
+```typescript
+import store from 'local-storage-js';
+
+const allItems = store.getItems();
+// 返回: { name: '张三', age: '25', theme: 'dark' }
+// 注意: 过期数据和TTL元数据不会出现在结果中
+```
+
+### getKeys()
+
+获取所有存储键，自动过滤过期数据和TTL元数据。
+
+```typescript
+import store from 'local-storage-js';
+
+const allKeys = store.getKeys();
+// 返回: ['name', 'age', 'theme']
+// 注意: 过期数据和内部TTL元数据键不会出现在结果中
+```
+
+### removeItem(key)
+
+增强版 `localStorage.removeItem`，支持批量删除，自动清理相关TTL数据。
+
+#### 使用示例
+
+```typescript
+import store from 'local-storage-js';
+
+// 单个删除（包括TTL数据）
 store.removeItem('name');
 
 // 批量删除 - 数组形式
@@ -245,12 +356,106 @@ store.clear();
 
 ### hasKey(key)
 
-检查指定键是否存在。
+检查指定键是否存在且未过期。
 
 ```typescript
 import store from 'local-storage-js';
 
 const exists = store.hasKey('name'); // boolean
+
+// 对于带TTL的数据，会自动检查是否过期
+store.setItem('temp', 'data', { ttl: 5000 });
+console.log(store.hasKey('temp')); // true
+
+setTimeout(() => {
+    console.log(store.hasKey('temp')); // false (已过期)
+}, 6000);
+```
+
+## ⏰ TTL过期功能
+
+本库支持完整的TTL (Time To Live) 过期时间功能，让你轻松管理临时数据。
+
+### 核心特性
+
+- 🕐 **灵活时间设置** - 支持`ttl`（相对时间）和`expires`（绝对时间）两种方式
+- 🔄 **自动清理** - 获取数据时自动检查并清理过期数据
+- 📦 **批量支持** - 所有批量操作都支持TTL设置
+- 🧹 **手动清理** - 提供`clearExpired()`方法手动清理过期数据
+- 🔍 **状态检查** - `getTTL()`方法查看剩余时间，`hasKey()`自动过滤过期数据
+- 🚫 **透明存储** - TTL元数据独立存储，不影响正常数据操作
+
+### 使用场景
+
+```typescript
+import store from 'local-storage-js';
+
+// 1. 会话令牌管理
+store.setItem('authToken', 'jwt_token_here', { ttl: 3600000 }); // 1小时后过期
+const token = store.getItem('authToken'); // 过期后自动返回null
+
+// 2. 缓存数据管理
+store.setItem('apiCache', responseData, { ttl: 300000 }); // 5分钟缓存
+const cachedData = store.getItem('apiCache'); // 自动检查过期
+
+// 3. 临时表单数据
+store.setItem('formDraft', formData, { ttl: 1800000 }); // 30分钟后清理
+
+// 4. 用户设置的临时配置
+store.setItem('tempSettings', userConfig, { expires: Date.now() + 86400000 }); // 明天过期
+
+// 5. 批量缓存设置
+store.setItem({
+    'cache_user_info': userData,
+    'cache_preferences': preferences
+}, { ttl: 1200000 }); // 20分钟后过期
+
+// 6. 定期清理过期数据
+setInterval(() => {
+    const cleaned = store.clearExpired();
+    console.log(`清理了 ${cleaned.length} 个过期项:`, cleaned);
+}, 60000); // 每分钟清理一次
+```
+
+### TTL最佳实践
+
+```typescript
+import store from 'local-storage-js';
+
+// 1. 检查数据是否仍有效
+function getCachedData(key: string) {
+    const ttl = store.getTTL(key);
+    if (ttl === null) {
+        console.log('数据没有设置TTL，永久有效');
+    } else if (ttl === -1) {
+        console.log('数据已过期');
+        return null;
+    } else {
+        console.log(`数据还有 ${Math.round(ttl / 1000)} 秒过期`);
+    }
+    return store.getItem(key);
+}
+
+// 2. 延长数据有效期
+function extendTTL(key: string, additionalTime: number) {
+    const currentTTL = store.getTTL(key);
+    if (currentTTL !== null && currentTTL !== -1) {
+        store.setTTL(key, currentTTL + additionalTime);
+        return true;
+    }
+    return false;
+}
+
+// 3. 条件性数据刷新
+function getOrRefreshCache(key: string, refreshFn: () => any, ttl: number) {
+    const cached = store.getItem(key);
+    if (cached === null) {
+        const fresh = refreshFn();
+        store.setItem(key, fresh, { ttl });
+        return fresh;
+    }
+    return cached;
+}
 ```
 
 ## 🛠️ 开发
@@ -332,18 +537,30 @@ store.setItem('nan', NaN);             // 转换为空字符串
 
 ## 🔧 TypeScript 支持
 
-完整的 TypeScript 类型定义：
+完整的 TypeScript 类型定义，包含TTL功能：
 
 ```typescript
+// TTL选项接口
+interface StorageOptions {
+    ttl?: number;      // 生存时间，毫秒为单位
+    expires?: number;  // 过期时间戳，毫秒为单位
+}
+
 interface LocalStorageEnhanced {
+    // setItem方法重载 - 支持TTL
     setItem<T = any>(key: string, value: T): void;
+    setItem<T = any>(key: string, value: T, options: StorageOptions): void;
     setItem<T = any>(keys: string[], values: T[] | T, deepTraversal?: boolean): void;
+    setItem<T = any>(keys: string[], values: T[] | T, options: StorageOptions, deepTraversal?: boolean): void;
     setItem<T = any>(keyValueMap: Record<string, T>, _?: null, deepTraversal?: boolean): void;
+    setItem<T = any>(keyValueMap: Record<string, T>, options: StorageOptions | null, deepTraversal?: boolean): void;
     
+    // getItem方法 - 自动处理过期数据
     getItem(key: string): string | null;
     getItem(keys: string[]): (string | null)[];
     getItem<T = Record<string, string | null>>(keyStructure: Record<string, string>): T;
     
+    // 基础方法 - 增强过期数据处理
     getItems(): Record<string, string | null>;
     getKeys(): string[];
     
@@ -353,6 +570,11 @@ interface LocalStorageEnhanced {
     
     clear(): void;
     hasKey(key: string | null | undefined): boolean;
+    
+    // TTL相关新方法
+    getTTL(key: string): number | null;      // 获取剩余TTL时间
+    setTTL(key: string, ttl: number): boolean; // 为已存在的key设置TTL
+    clearExpired(): string[];                // 手动清理所有过期数据
 }
 
 declare global {
@@ -362,7 +584,19 @@ declare global {
 
 ## 📝 更新日志
 
-### v0.0.8 (Latest)
+### v0.0.9 (Latest)
+
+- ⏰ **重大功能**: 新增完整的TTL过期时间支持
+- 🕐 **灵活时间设置**: 支持`ttl`和`expires`两种时间设置方式
+- 🔄 **自动清理**: 获取数据时自动检查并清理过期数据
+- 📦 **批量TTL**: 所有批量操作都支持TTL设置
+- 🧹 **手动清理**: 新增`clearExpired()`方法手动清理过期数据
+- 🔍 **状态检查**: 新增`getTTL()`和`setTTL()`方法管理TTL
+- 🧪 **测试完善**: 新增12个TTL专项测试，总测试数达到48个
+- 🚫 **透明存储**: TTL元数据独立存储，不干扰正常数据操作
+- 📚 **文档更新**: 完善TTL功能文档和最佳实践指南
+
+### v0.0.8
 
 - 🔄 **重大重构**: 完全迁移到 TypeScript
 - 🧪 **测试完善**: 新增 36 个综合测试用例，覆盖率 100%
