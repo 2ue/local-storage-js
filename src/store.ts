@@ -20,10 +20,20 @@ type DataType =
     | 'function'
     | 'date';
 
+// TTL选项接口
+interface StorageOptions {
+    ttl?: number; // 生存时间，毫秒为单位
+    expires?: number; // 过期时间戳，毫秒为单位
+}
+
 interface LocalStorageEnhanced {
+    // setItem 方法重载 - 保持向后兼容
     setItem<T = any>(key: string, value: T): void;
+    setItem<T = any>(key: string, value: T, options: StorageOptions): void;
     setItem<T = any>(keys: string[], values: T[] | T, deepTraversal?: boolean): void;
+    setItem<T = any>(keys: string[], values: T[] | T, options: StorageOptions, deepTraversal?: boolean): void;
     setItem<T = any>(keyValueMap: Record<string, T>, _?: null, deepTraversal?: boolean): void;
+    setItem<T = any>(keyValueMap: Record<string, T>, options: StorageOptions | null, deepTraversal?: boolean): void;
 
     getItem(key: string): string | null;
     getItem(keys: string[]): (string | null)[];
@@ -38,12 +48,22 @@ interface LocalStorageEnhanced {
 
     clear(): void;
     hasKey(key: string | null | undefined): boolean;
+    
+    // 新增TTL相关方法
+    getTTL(key: string): number | null; // 获取剩余TTL时间
+    setTTL(key: string, ttl: number): boolean; // 为已存在的key设置TTL
+    clearExpired(): string[]; // 手动清理所有过期数据，返回清理的key列表
 }
 
 interface UtilityFunctions {
     getType(para: any): DataType;
     map(para: any, fn: (keyOrIndex: string | number, value: any, original: any) => void): void;
     filterValue(val: any): string;
+    // TTL相关工具函数
+    isExpired(key: string): boolean; // 检查key是否过期
+    setWithTTL(key: string, value: string, options: StorageOptions): void; // 设置带TTL的数据
+    getWithTTL(key: string): string | null; // 获取数据并自动检查过期
+    getTTLKey(key: string): string; // 获取TTL元数据key
 }
 
 // 模块定义
@@ -101,6 +121,50 @@ interface UtilityFunctions {
             if (stringVal.indexOf(valType) >= 0) return String(val);
             return JSON.stringify(val);
         },
+
+        // TTL相关工具函数
+        getTTLKey: function (key: string): string {
+            return `__ttl_${key}`;
+        },
+
+        isExpired: function (key: string): boolean {
+            const ttlKey = _util.getTTLKey(key);
+            const expiresStr = _store!.getItem(ttlKey);
+            if (!expiresStr) return false;
+            
+            const expires = parseInt(expiresStr, 10);
+            const now = Date.now();
+            
+            if (now > expires) {
+                // 已过期，清理数据
+                _store!.removeItem(key);
+                _store!.removeItem(ttlKey);
+                return true;
+            }
+            return false;
+        },
+
+        setWithTTL: function (key: string, value: string, options: StorageOptions): void {
+            _store!.setItem(key, value);
+            
+            let expires: number | undefined;
+            if (options.expires) {
+                expires = options.expires;
+            } else if (options.ttl) {
+                expires = Date.now() + options.ttl;
+            }
+            
+            if (expires) {
+                _store!.setItem(_util.getTTLKey(key), expires.toString());
+            }
+        },
+
+        getWithTTL: function (key: string): string | null {
+            if (_util.isExpired(key)) {
+                return null;
+            }
+            return _store!.getItem(key);
+        },
     };
 
     const store: LocalStorageEnhanced = {
@@ -108,19 +172,57 @@ interface UtilityFunctions {
          * @function 设置值 替代和增强localStorage的setItem方法
          * @param _k 必须参数，当为array, object时，类似解构赋值
          * @param _v 非必须参数，当_k为object时，会忽略此参数
-         * @param _d 非必须，默认为false，是否开启深度遍历赋值
+         * @param _d_or_options 非必须，可以是boolean(深度遍历)或StorageOptions对象
+         * @param _d 非必须，当第三个参数是StorageOptions时，这个参数表示深度遍历
          */
         setItem: function <T = any>(
             _k: string | string[] | Record<string, T>,
             _v?: T | T[] | null,
+            _d_or_options?: boolean | StorageOptions,
             _d?: boolean
         ): void {
             const _this = this;
             const keyType = _util.getType(_k);
             const valType = _util.getType(_v);
+            
+            // 参数解析：支持向后兼容
+            let deepTraversal = false;
+            let options: StorageOptions | undefined;
+            
+            if (keyType === 'object') {
+                // 对象形式：setItem({key: value}, options?, deepTraversal?)
+                if (_v && typeof _v === 'object' && !Array.isArray(_v) && ('ttl' in _v || 'expires' in _v)) {
+                    options = _v as StorageOptions;
+                    deepTraversal = _d_or_options as boolean || false;
+                } else if (typeof _v === 'boolean') {
+                    deepTraversal = _v;
+                } else if (_d_or_options && typeof _d_or_options === 'object') {
+                    options = _d_or_options;
+                    deepTraversal = _d || false;
+                } else if (typeof _d_or_options === 'boolean') {
+                    deepTraversal = _d_or_options;
+                }
+            } else {
+                // 字符串/数组形式
+                if (typeof _d_or_options === 'boolean') {
+                    // 原有的调用方式：setItem(key, value, deepTraversal)
+                    deepTraversal = _d_or_options;
+                } else if (_d_or_options && typeof _d_or_options === 'object') {
+                    // 新的调用方式：setItem(key, value, options) 或 setItem(key, value, options, deepTraversal)
+                    options = _d_or_options;
+                    deepTraversal = _d || false;
+                }
+            }
 
             if (keyType === 'string') {
-                _store!.setItem(_k as string, _util.filterValue(_v));
+                const key = _k as string;
+                const value = _util.filterValue(_v);
+                
+                if (options && (options.ttl || options.expires)) {
+                    _util.setWithTTL(key, value, options);
+                } else {
+                    _store!.setItem(key, value);
+                }
             } else if (keyType === 'array') {
                 const keys = _k as string[];
                 _util.map(keys, function (i: string | number, key: string) {
@@ -130,19 +232,37 @@ interface UtilityFunctions {
                             : valType === 'object'
                               ? (_v as Record<string, T>)[key]
                               : _v;
-                    if (_d) {
-                        _this.setItem(key, val);
+                    if (deepTraversal) {
+                        if (options) {
+                            _this.setItem(key, val, options);
+                        } else {
+                            _this.setItem(key, val);
+                        }
                     } else {
-                        _store!.setItem(key, _util.filterValue(val));
+                        const value = _util.filterValue(val);
+                        if (options && (options.ttl || options.expires)) {
+                            _util.setWithTTL(key, value, options);
+                        } else {
+                            _store!.setItem(key, value);
+                        }
                     }
                 });
             } else if (keyType === 'object') {
                 const keyValueMap = _k as Record<string, T>;
                 _util.map(keyValueMap, function (key: string | number, val: T) {
-                    if (_d) {
-                        _this.setItem(key as string, val);
+                    if (deepTraversal) {
+                        if (options) {
+                            _this.setItem(key as string, val, options);
+                        } else {
+                            _this.setItem(key as string, val);
+                        }
                     } else {
-                        _store!.setItem(key as string, _util.filterValue(val));
+                        const value = _util.filterValue(val);
+                        if (options && (options.ttl || options.expires)) {
+                            _util.setWithTTL(key as string, value, options);
+                        } else {
+                            _store!.setItem(key as string, value);
+                        }
                     }
                 });
             } else {
@@ -160,11 +280,11 @@ interface UtilityFunctions {
             let res: any;
 
             if (keyType === 'string') {
-                res = _store!.getItem(_k as string);
+                res = _util.getWithTTL(_k as string);
             } else if (keyType === 'array') {
                 res = [];
                 const keys = _k as string[];
-                _util.map(keys, function (i: string | number, val: string) {
+                _util.map(keys, function (_i: string | number, val: string) {
                     res.push(_this.getItem(val));
                 });
             } else if (keyType === 'object') {
@@ -189,8 +309,12 @@ interface UtilityFunctions {
 
             for (let i = 0; i < _store!.length; i++) {
                 const key = _store!.key(i);
-                if (key) {
-                    res[key] = _this.getItem(key);
+                if (key && !key.startsWith('__ttl_')) {
+                    // 过滤掉TTL元数据key，并使用支持TTL的getItem方法
+                    const value = _this.getItem(key);
+                    if (value !== null) {
+                        res[key] = value;
+                    }
                 }
             }
             return res;
@@ -204,8 +328,11 @@ interface UtilityFunctions {
             const res: string[] = [];
             for (let i = 0; i < _store!.length; i++) {
                 const key = _store!.key(i);
-                if (key) {
-                    res.push(key);
+                if (key && !key.startsWith('__ttl_')) {
+                    // 过滤掉TTL元数据key，并检查是否过期
+                    if (!_util.isExpired(key)) {
+                        res.push(key);
+                    }
                 }
             }
             return res;
@@ -219,16 +346,22 @@ interface UtilityFunctions {
             const keyType = _util.getType(_k);
 
             if (keyType === 'string') {
-                _store!.removeItem(_k as string);
+                const key = _k as string;
+                _store!.removeItem(key);
+                // 同时删除对应的TTL数据
+                _store!.removeItem(_util.getTTLKey(key));
             } else if (keyType === 'array') {
                 const keys = _k as string[];
-                _util.map(keys, function (i: string | number, key: string) {
+                _util.map(keys, function (_i: string | number, key: string) {
                     _store!.removeItem(key);
+                    _store!.removeItem(_util.getTTLKey(key));
                 });
             } else if (keyType === 'object') {
                 const keyValueMap = _k as Record<string, any>;
                 _util.map(keyValueMap, function (key: string | number) {
-                    _store!.removeItem(key as string);
+                    const keyStr = key as string;
+                    _store!.removeItem(keyStr);
+                    _store!.removeItem(_util.getTTLKey(keyStr));
                 });
             }
         },
@@ -246,7 +379,69 @@ interface UtilityFunctions {
          * @return 返回布尔值
          */
         hasKey: function (_k: string | null | undefined): boolean {
-            return typeof _k !== 'undefined' && _k !== null && _store!.hasOwnProperty(_k);
+            if (typeof _k !== 'undefined' && _k !== null) {
+                // 检查key是否存在且未过期
+                return _store!.hasOwnProperty(_k) && !_util.isExpired(_k);
+            }
+            return false;
+        },
+
+        /**
+         * @function 获取key的剩余TTL时间
+         * @param key 键名
+         * @returns 剩余时间（毫秒），如果没有TTL返回null，如果已过期返回-1
+         */
+        getTTL: function (key: string): number | null {
+            const ttlKey = _util.getTTLKey(key);
+            const expiresStr = _store!.getItem(ttlKey);
+            
+            if (!expiresStr) return null;
+            
+            const expires = parseInt(expiresStr, 10);
+            const now = Date.now();
+            const remaining = expires - now;
+            
+            return remaining > 0 ? remaining : -1;
+        },
+
+        /**
+         * @function 为已存在的key设置TTL
+         * @param key 键名
+         * @param ttl TTL时间（毫秒）
+         * @returns 是否设置成功
+         */
+        setTTL: function (key: string, ttl: number): boolean {
+            if (!_store!.hasOwnProperty(key)) return false;
+            
+            const expires = Date.now() + ttl;
+            _store!.setItem(_util.getTTLKey(key), expires.toString());
+            return true;
+        },
+
+        /**
+         * @function 手动清理所有过期数据
+         * @returns 被清理的key列表
+         */
+        clearExpired: function (): string[] {
+            const expiredKeys: string[] = [];
+            const keysToCheck: string[] = [];
+            
+            // 收集所有需要检查的key
+            for (let i = 0; i < _store!.length; i++) {
+                const key = _store!.key(i);
+                if (key && !key.startsWith('__ttl_')) {
+                    keysToCheck.push(key);
+                }
+            }
+            
+            // 检查每个key是否过期
+            keysToCheck.forEach(key => {
+                if (_util.isExpired(key)) {
+                    expiredKeys.push(key);
+                }
+            });
+            
+            return expiredKeys;
         },
     };
 

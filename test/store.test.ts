@@ -12,10 +12,19 @@ interface MockLocalStorage {
     hasOwnProperty(key: string): boolean;
 }
 
+// TTL选项接口
+interface StorageOptions {
+    ttl?: number;
+    expires?: number;
+}
+
 interface LocalStorageEnhanced {
     setItem<T = any>(key: string, value: T): void;
+    setItem<T = any>(key: string, value: T, options: StorageOptions): void;
     setItem<T = any>(keys: string[], values: T[] | T, deepTraversal?: boolean): void;
+    setItem<T = any>(keys: string[], values: T[] | T, options: StorageOptions, deepTraversal?: boolean): void;
     setItem<T = any>(keyValueMap: Record<string, T>, _?: null, deepTraversal?: boolean): void;
+    setItem<T = any>(keyValueMap: Record<string, T>, options: StorageOptions | null, deepTraversal?: boolean): void;
 
     getItem(key: string): string | null;
     getItem(keys: string[]): (string | null)[];
@@ -30,6 +39,11 @@ interface LocalStorageEnhanced {
 
     clear(): void;
     hasKey(key: string | null | undefined): boolean;
+    
+    // TTL相关方法
+    getTTL(key: string): number | null;
+    setTTL(key: string, ttl: number): boolean;
+    clearExpired(): string[];
 }
 
 // 扩展global类型
@@ -517,6 +531,175 @@ describe('localStorage增强库测试', () => {
             store.clear();
 
             expect(store.getKeys().length).toBe(0);
+        });
+    });
+
+    // TTL 功能测试
+    describe('TTL 功能测试', () => {
+        beforeEach(() => {
+            store.clear();
+        });
+
+        it('基本TTL设置和获取', () => {
+            // 设置1秒过期时间
+            store.setItem('ttl-key', 'ttl-value', { ttl: 1000 });
+            
+            // 立即获取应该成功
+            expect(store.getItem('ttl-key')).toBe('ttl-value');
+            expect(store.hasKey('ttl-key')).toBe(true);
+        });
+
+        it('TTL过期时间设置', () => {
+            const expireTime = Date.now() + 1000; // 1秒后过期
+            store.setItem('expire-key', 'expire-value', { expires: expireTime });
+            
+            expect(store.getItem('expire-key')).toBe('expire-value');
+            
+            // 检查TTL剩余时间
+            const remainingTTL = store.getTTL('expire-key');
+            expect(remainingTTL).toBeGreaterThan(500); // 应该还剩500ms以上
+            expect(remainingTTL).toBeLessThanOrEqual(1000);
+        });
+
+        it('TTL过期后数据自动清理', (done) => {
+            // 设置100ms过期时间
+            store.setItem('short-ttl', 'value', { ttl: 100 });
+            
+            expect(store.getItem('short-ttl')).toBe('value');
+            
+            // 150ms后检查是否已过期
+            setTimeout(() => {
+                expect(store.getItem('short-ttl')).toBeNull();
+                expect(store.hasKey('short-ttl')).toBe(false);
+                done();
+            }, 150);
+        });
+
+        it('为已存在的key设置TTL', () => {
+            // 先设置无TTL的数据
+            store.setItem('existing-key', 'existing-value');
+            expect(store.getTTL('existing-key')).toBeNull();
+            
+            // 为已存在的key设置TTL
+            const success = store.setTTL('existing-key', 1000);
+            expect(success).toBe(true);
+            
+            // 检查TTL
+            const ttl = store.getTTL('existing-key');
+            expect(ttl).toBeGreaterThan(500);
+            expect(ttl).toBeLessThanOrEqual(1000);
+        });
+
+        it('为不存在的key设置TTL应该失败', () => {
+            const success = store.setTTL('non-existent', 1000);
+            expect(success).toBe(false);
+        });
+
+        it('批量操作支持TTL', () => {
+            // 批量设置带TTL的数据
+            store.setItem(['key1', 'key2'], ['value1', 'value2'], { ttl: 1000 });
+            
+            expect(store.getItem('key1')).toBe('value1');
+            expect(store.getItem('key2')).toBe('value2');
+            expect(store.getTTL('key1')).toBeGreaterThan(500);
+            expect(store.getTTL('key2')).toBeGreaterThan(500);
+        });
+
+        it('对象形式批量设置TTL', () => {
+            store.setItem({
+                obj1: 'value1',
+                obj2: 'value2'
+            }, { ttl: 1000 });
+            
+            expect(store.getItem('obj1')).toBe('value1');
+            expect(store.getTTL('obj1')).toBeGreaterThan(500);
+            expect(store.getTTL('obj2')).toBeGreaterThan(500);
+        });
+
+        it('手动清理过期数据', (done) => {
+            // 设置多个不同过期时间的数据
+            store.setItem('key1', 'value1', { ttl: 50 });  // 50ms过期
+            store.setItem('key2', 'value2', { ttl: 200 }); // 200ms过期
+            store.setItem('key3', 'value3'); // 无过期时间
+            
+            setTimeout(() => {
+                // 手动清理过期数据
+                const expiredKeys = store.clearExpired();
+                
+                // key1应该已过期
+                expect(expiredKeys).toContain('key1');
+                expect(store.hasKey('key1')).toBe(false);
+                
+                // key2和key3应该还存在
+                expect(store.hasKey('key2')).toBe(true);
+                expect(store.hasKey('key3')).toBe(true);
+                
+                done();
+            }, 80); // 80ms后，key1过期，key2还未过期
+        });
+
+        it('getItems和getKeys过滤过期数据', (done) => {
+            store.setItem('normal', 'value');
+            store.setItem('expiring', 'value', { ttl: 50 });
+            
+            expect(store.getKeys().length).toBe(2);
+            expect(Object.keys(store.getItems()).length).toBe(2);
+            
+            setTimeout(() => {
+                // 过期后应该被过滤掉
+                const keys = store.getKeys();
+                const items = store.getItems();
+                
+                expect(keys).toContain('normal');
+                expect(keys).not.toContain('expiring');
+                expect(keys.length).toBe(1);
+                
+                expect(items.hasOwnProperty('normal')).toBe(true);
+                expect(items.hasOwnProperty('expiring')).toBe(false);
+                expect(Object.keys(items).length).toBe(1);
+                
+                done();
+            }, 80);
+        });
+
+        it('TTL元数据不会出现在普通操作中', () => {
+            store.setItem('ttl-test', 'value', { ttl: 1000 });
+            
+            const keys = store.getKeys();
+            const items = store.getItems();
+            
+            // 不应该包含TTL元数据key
+            expect(keys.filter(k => k.startsWith('__ttl_'))).toEqual([]);
+            expect(Object.keys(items).filter(k => k.startsWith('__ttl_'))).toEqual([]);
+        });
+
+        it('删除数据时同时清理TTL元数据', () => {
+            store.setItem('to-delete', 'value', { ttl: 1000 });
+            
+            // 确认TTL元数据存在
+            expect(store.getTTL('to-delete')).toBeGreaterThan(0);
+            
+            // 删除数据
+            store.removeItem('to-delete');
+            
+            // TTL信息也应该被清理
+            expect(store.getTTL('to-delete')).toBeNull();
+        });
+
+        it('向后兼容性测试', () => {
+            // 原有的API调用方式应该继续工作
+            store.setItem('old-style', 'value');
+            expect(store.getItem('old-style')).toBe('value');
+            
+            store.setItem(['arr1', 'arr2'], ['val1', 'val2']);
+            expect(store.getItem('arr1')).toBe('val1');
+            
+            store.setItem({ obj1: 'objval1' });
+            expect(store.getItem('obj1')).toBe('objval1');
+            
+            // 深度遍历也应该工作
+            store.setItem(['deep1', 'deep2'], ['dval1', 'dval2'], true);
+            expect(store.getItem('deep1')).toBe('dval1');
         });
     });
 });
