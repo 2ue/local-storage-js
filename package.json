@@ -2,12 +2,28 @@
   "name": "local-storage-js",
   "version": "0.0.8",
   "description": "对`localstorage`的简单增强，方便应对项目中各种情况。目前暂未对不支持`localstorage`的平台做兼容处理，所以使用之前一定要确保平台支持`localstorage`功能",
-  "main": "./src/store.js",
+  "main": "./dist/store.js",
+  "types": "./dist/store.d.ts",
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ],
   "directories": {
     "doc": "doc"
   },
   "scripts": {
-    "test": "jest"
+    "build": "tsc",
+    "clean": "rm -rf dist coverage",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src test --ext .ts",
+    "lint:fix": "eslint src test --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
+    "check": "npm run format:check && npm run lint",
+    "fix": "npm run format && npm run lint:fix",
+    "prepublishOnly": "npm run clean && npm run check && npm run build && npm test"
   },
   "repository": {
     "type": "git",
@@ -26,8 +42,18 @@
   },
   "homepage": "https://github.com/2ue/storejs#readme",
   "devDependencies": {
+    "@eslint/js": "^9.33.0",
     "@types/jest": "^30.0.0",
+    "@types/node": "^24.2.1",
+    "@typescript-eslint/eslint-plugin": "^8.39.0",
+    "@typescript-eslint/parser": "^8.39.0",
+    "eslint": "^9.33.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
     "jest": "^30.0.5",
-    "jsdom": "^26.1.0"
+    "jsdom": "^26.1.0",
+    "prettier": "^3.6.2",
+    "ts-jest": "^29.4.1",
+    "typescript": "^5.9.2"
   }
 }

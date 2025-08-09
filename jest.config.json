@@ -1,11 +1,17 @@
 {
+  "preset": "ts-jest",
   "testEnvironment": "node",
-  "testMatch": ["**/test/**/*.test.js"],
+  "testMatch": ["**/test/**/*.test.ts"],
   "collectCoverage": true,
   "coverageDirectory": "coverage",
   "coverageReporters": ["text", "lcov", "html"],
   "collectCoverageFrom": [
-    "src/**/*.js",
+    "src/**/*.ts",
     "!**/node_modules/**"
-  ]
+  ],
+  "transform": {
+    "^.+\\.ts$": "ts-jest"
+  },
+  "moduleFileExtensions": ["ts", "js"],
+  "testTimeout": 10000
 }
