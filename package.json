@@ -1,6 +1,6 @@
 {
   "name": "local-storage-js",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "对`localstorage`的简单增强，方便应对项目中各种情况。目前暂未对不支持`localstorage`的平台做兼容处理，所以使用之前一定要确保平台支持`localstorage`功能",
   "main": "./dist/store.js",
   "types": "./dist/store.d.ts",
