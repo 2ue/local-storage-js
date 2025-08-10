@@ -28,16 +28,22 @@ interface StorageOptions {
 
 interface LocalStorageEnhanced {
     // setItem 方法重载 - 保持向后兼容
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setItem<T = any>(key: string, value: T): void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setItem<T = any>(key: string, value: T, options: StorageOptions): void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setItem<T = any>(keys: string[], values: T[] | T, deepTraversal?: boolean): void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setItem<T = any>(
         keys: string[],
         values: T[] | T,
         options: StorageOptions,
         deepTraversal?: boolean
     ): void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setItem<T = any>(keyValueMap: Record<string, T>, _?: null, deepTraversal?: boolean): void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setItem<T = any>(
         keyValueMap: Record<string, T>,
         options: StorageOptions | null,
@@ -53,6 +59,7 @@ interface LocalStorageEnhanced {
 
     removeItem(key: string): void;
     removeItem(keys: string[]): void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     removeItem(keyValueMap: Record<string, any>): void;
 
     clear(): void;
@@ -65,8 +72,11 @@ interface LocalStorageEnhanced {
 }
 
 interface UtilityFunctions {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     getType(para: any): DataType;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     map(para: any, fn: (keyOrIndex: string | number, value: any, original: any) => void): void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     filterValue(val: any): string;
     // TTL相关工具函数
     isExpired(key: string): boolean; // 检查key是否过期
@@ -77,6 +87,7 @@ interface UtilityFunctions {
 
 // 模块定义
 (function (root: Window | typeof globalThis) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const _store: Storage | null = (root as any).localStorage || null;
 
     // 检测是否支持localStorage
@@ -95,11 +106,13 @@ interface UtilityFunctions {
             setTTL: () => false,
             clearExpired: () => [],
         };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (root as any).store = emptyStore;
         return;
     }
 
     const _util: UtilityFunctions = {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         getType: function (para: any): DataType {
             const type = typeof para;
             if (type === 'number' && isNaN(para)) return 'NaN';
@@ -112,18 +125,22 @@ interface UtilityFunctions {
         },
 
         map: function (
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             para: any,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             fn: (keyOrIndex: string | number, value: any, original: any) => void
         ): void {
             const paraType = _util.getType(para);
             const fnType = _util.getType(fn);
 
             if (paraType === 'array') {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const arr = para as any[];
                 for (let i = 0; i < arr.length; i++) {
                     if (fnType === 'function') fn(i, arr[i], para);
                 }
             } else if (paraType === 'object') {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const obj = para as Record<string, any>;
                 for (const key in obj) {
                     if (fnType === 'function') fn(key, obj[key], para);
@@ -134,6 +151,7 @@ interface UtilityFunctions {
         },
 
         // 过滤值
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         filterValue: function (val: any): string {
             const valType = _util.getType(val);
             const nullVal: DataType[] = ['null', 'undefined', 'NaN'];
@@ -144,6 +162,7 @@ interface UtilityFunctions {
 
             try {
                 return JSON.stringify(val);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
             } catch (error: any) {
                 console.error('Converting circular structure to JSON');
                 return String(val);
@@ -205,6 +224,7 @@ interface UtilityFunctions {
          * @param _d_or_options 非必须，可以是boolean(深度遍历)或StorageOptions对象
          * @param _d 非必须，当第三个参数是StorageOptions时，这个参数表示深度遍历
          */
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setItem: function <T = any>(
             _k: string | string[] | Record<string, T>,
             _v?: T | T[] | null,
@@ -309,9 +329,11 @@ interface UtilityFunctions {
          * @function 获取数据 替代和增强localStorage的getItem方法
          * @param _k 必须参数，当为array, object时，按照对应解构返回数据，深度遍历
          */
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         getItem: function (_k: string | string[] | Record<string, string>): any {
             const _this = this;
             const keyType = _util.getType(_k);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             let res: any;
 
             if (keyType === 'string') {
@@ -377,6 +399,7 @@ interface UtilityFunctions {
          * @function 移除key 替代和增强localStorage的removeItem
          * @param _k 必须参数，当为array, object时，深度遍历
          */
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         removeItem: function (_k: string | string[] | Record<string, any>): void {
             const keyType = _util.getType(_k);
 
@@ -392,6 +415,7 @@ interface UtilityFunctions {
                     _store!.removeItem(_util.getTTLKey(key));
                 });
             } else if (keyType === 'object') {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const keyValueMap = _k as Record<string, any>;
                 _util.map(keyValueMap, function (key: string | number) {
                     const keyStr = key as string;
@@ -488,7 +512,9 @@ interface UtilityFunctions {
     };
 
     // 导出到全局
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (root as any).store = store;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
 })(typeof window !== 'undefined' ? window : (global as any));
 
 // 类型声明扩展
@@ -500,4 +526,5 @@ declare global {
     var store: LocalStorageEnhanced;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default typeof window !== 'undefined' ? window.store : (global as any).store;
