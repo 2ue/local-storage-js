@@ -2,7 +2,6 @@ const js = require('@eslint/js');
 const typescript = require('@typescript-eslint/eslint-plugin');
 const typescriptParser = require('@typescript-eslint/parser');
 const prettier = require('eslint-plugin-prettier');
-const prettierConfig = require('eslint-config-prettier');
 
 module.exports = [
     {
@@ -30,9 +29,34 @@ module.exports = [
             prettier: prettier,
         },
         rules: {
-            // Prettier integration
-            ...prettierConfig.rules,
+            // Prettier integration - manually disable conflicting rules for Node.js 16 compatibility
             'prettier/prettier': 'error',
+            'arrow-body-style': 'off',
+            'prefer-arrow-callback': 'off',
+            'curly': 'off',
+            'lines-around-comment': 'off',
+            'max-len': 'off',
+            'no-confusing-arrow': 'off',
+            'no-mixed-operators': 'off',
+            'no-tabs': 'off',
+            'no-unexpected-multiline': 'off',
+            'quotes': 'off',
+            'semi': 'off',
+            '@typescript-eslint/quotes': 'off',
+            '@typescript-eslint/brace-style': 'off',
+            '@typescript-eslint/comma-dangle': 'off',
+            '@typescript-eslint/comma-spacing': 'off',
+            '@typescript-eslint/func-call-spacing': 'off',
+            '@typescript-eslint/indent': 'off',
+            '@typescript-eslint/keyword-spacing': 'off',
+            '@typescript-eslint/member-delimiter-style': 'off',
+            '@typescript-eslint/no-extra-parens': 'off',
+            '@typescript-eslint/no-extra-semi': 'off',
+            '@typescript-eslint/object-curly-spacing': 'off',
+            '@typescript-eslint/semi': 'off',
+            '@typescript-eslint/space-before-function-paren': 'off',
+            '@typescript-eslint/space-infix-ops': 'off',
+            '@typescript-eslint/type-annotation-spacing': 'off',
             
             // TypeScript rules
             '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
@@ -73,9 +97,34 @@ module.exports = [
             prettier: prettier,
         },
         rules: {
-            // Prettier integration
-            ...prettierConfig.rules,
+            // Prettier integration - manually disable conflicting rules for Node.js 16 compatibility
             'prettier/prettier': 'error',
+            'arrow-body-style': 'off',
+            'prefer-arrow-callback': 'off',
+            'curly': 'off',
+            'lines-around-comment': 'off',
+            'max-len': 'off',
+            'no-confusing-arrow': 'off',
+            'no-mixed-operators': 'off',
+            'no-tabs': 'off',
+            'no-unexpected-multiline': 'off',
+            'quotes': 'off',
+            'semi': 'off',
+            '@typescript-eslint/quotes': 'off',
+            '@typescript-eslint/brace-style': 'off',
+            '@typescript-eslint/comma-dangle': 'off',
+            '@typescript-eslint/comma-spacing': 'off',
+            '@typescript-eslint/func-call-spacing': 'off',
+            '@typescript-eslint/indent': 'off',
+            '@typescript-eslint/keyword-spacing': 'off',
+            '@typescript-eslint/member-delimiter-style': 'off',
+            '@typescript-eslint/no-extra-parens': 'off',
+            '@typescript-eslint/no-extra-semi': 'off',
+            '@typescript-eslint/object-curly-spacing': 'off',
+            '@typescript-eslint/semi': 'off',
+            '@typescript-eslint/space-before-function-paren': 'off',
+            '@typescript-eslint/space-infix-ops': 'off',
+            '@typescript-eslint/type-annotation-spacing': 'off',
             
             // TypeScript rules
             '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
