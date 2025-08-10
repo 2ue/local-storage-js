@@ -1,8 +1,10 @@
 # localStorage增强库 (local-storage-js)
 
 [![npm version](https://img.shields.io/npm/v/local-storage-js.svg)](https://www.npmjs.com/package/local-storage-js)
+[![CI](https://github.com/2ue/storejs/workflows/CI/badge.svg)](https://github.com/2ue/storejs/actions/workflows/ci.yml)
+[![Release](https://github.com/2ue/storejs/workflows/Release%20and%20Publish/badge.svg)](https://github.com/2ue/storejs/actions/workflows/release.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
-[![Test Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](https://github.com/2ue/storejs)
+[![Test Coverage](https://img.shields.io/badge/coverage-90%25+-brightgreen.svg)](https://github.com/2ue/storejs)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > 对 `localStorage` 的全面增强，支持批量操作、复杂数据类型存储、TTL过期时间和 TypeScript 类型安全。提供了更强大、更灵活的本地存储解决方案。

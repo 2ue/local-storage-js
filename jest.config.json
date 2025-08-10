@@ -1,6 +1,6 @@
 {
   "preset": "ts-jest",
-  "testEnvironment": "node",
+  "testEnvironment": "jsdom",
   "testMatch": ["**/test/**/*.test.ts"],
   "collectCoverage": true,
   "coverageDirectory": "coverage",
@@ -13,5 +13,6 @@
     "^.+\\.ts$": "ts-jest"
   },
   "moduleFileExtensions": ["ts", "js"],
-  "testTimeout": 10000
+  "testTimeout": 10000,
+  "setupFilesAfterEnv": ["<rootDir>/test/setup.ts"]
 }
